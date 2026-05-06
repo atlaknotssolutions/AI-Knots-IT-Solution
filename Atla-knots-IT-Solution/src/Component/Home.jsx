@@ -905,44 +905,48 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <div className="space-y-4">
-            {[
-              {
-                q: "What services does AI Knots provide?",
-                a: "We offer end-to-end IT services including Web & Mobile Development, Testing, L2 Support, BPO (Voice, Chat, Email), Digital Marketing (SEO, SMM, PPC), and Professional Training programs.",
-              },
-              {
-                q: "Do you work with startups or only large enterprises?",
-                a: "We work with businesses of all sizes — from startups and SMEs to established enterprises and government/PSU projects.",
-              },
-              {
-                q: "How long does it take to complete a project?",
-                a: "Project timelines vary based on scope and complexity. A simple website may take 3–6 weeks, while a full-scale web application or digital transformation project can take 3–6 months.",
-              },
-              {
-                q: "Do you provide ongoing support and maintenance?",
-                a: "Yes. We offer 24×7 production support, SLA-based Annual Maintenance Contracts (AMC), and long-term application management services (AMS).",
-              },
-              {
-                q: "What is the process for starting a project with you?",
-                a: "It starts with a free consultation call → requirement discussion → proposal with timeline & cost → agreement → kickoff and regular updates throughout the project.",
-              },
-              {
-                q: "Do you offer free demos or consultations?",
-                a: "Absolutely! We offer free consultations and live demos for both our services and professional training courses.",
-              },
-              {
-                q: "Where is AI Knots located?",
-                a: "We are based in Bhopal, Madhya Pradesh (M.P. Nagar Zone 2). We serve clients across India and globally.",
-              },
-              {
-                q: "What makes AI Knots different from other IT companies?",
-                a: "We focus on true partnership, transparent communication, result-driven solutions, and long-term support rather than just delivering projects.",
-              },
-            ].map((faq, index) => (
-              <FAQItem key={index} question={faq.q} answer={faq.a} />
-            ))}
-          </div>
+         <div className="space-y-4">
+  {[
+    {
+      q: "What services does your IT company provide?",
+      a: "We offer comprehensive end-to-end IT services including Web & Mobile App Development, Custom Software Development, QA Testing, L2/L3 Support, BPO (Voice, Chat, Email), Digital Marketing (SEO, SMM, PPC, Content), Cloud Solutions, and Professional IT Training programs.",
+    },
+    {
+      q: "Do you work with startups or only large enterprises?",
+      a: "We work with businesses of all sizes — from startups and SMEs to large enterprises, government projects, and PSUs.",
+    },
+    {
+      q: "How long does it take to complete a project?",
+      a: "Project timelines depend on scope and complexity. A simple static website takes 3–6 weeks, while a full-scale web/mobile application or complex ERP/CRM project can take 3–8 months.",
+    },
+    {
+      q: "Do you provide ongoing support and maintenance?",
+      a: "Yes. We provide 24×7 production support, SLA-based Annual Maintenance Contracts (AMC), Application Management Services (AMS), and dedicated support teams.",
+    },
+    {
+      q: "What is the process for starting a project with you?",
+      a: "It starts with a free consultation call → detailed requirement gathering → proposal with timeline & cost estimate → NDA & agreement → project kickoff with regular sprint reviews and updates.",
+    },
+    {
+      q: "Do you offer free demos or consultations?",
+      a: "Absolutely! We offer free initial consultations, requirement analysis sessions, and live demos of similar projects we have delivered.",
+    },
+    {
+      q: "Where is your IT company located?",
+      a: "We are based in Bhopal, Madhya Pradesh (M.P. Nagar Zone 2). We serve clients across India and globally through remote and on-site models.",
+    },
+    {
+      q: "What makes your IT company different from others?",
+      a: "We focus on long-term partnerships, complete transparency, result-oriented delivery, quality-first approach, and post-delivery support rather than just project completion.",
+    },
+    {
+      q: "Do you sign NDAs and ensure data security?",
+      a: "Yes. We sign NDAs with every client and follow strict data security protocols, ISO standards, and secure development practices.",
+    },
+  ].map((faq, index) => (
+    <FAQItem key={index} question={faq.q} answer={faq.a} />
+  ))}
+</div>
         </div>
       </section>
 
@@ -990,146 +994,137 @@ export default function Home() {
             onClick={() => setShowPopup(false)}
           >
             <motion.div
-              initial={{ scale: 0.9, y: 40, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={{ scale: 0.9, y: 40, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-w-4xl w-full overflow-hidden flex flex-col lg:flex-row max-h-[92vh]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Left Side - Offer Content */}
-              <div className="lg:w-1/2 bg-gradient-to-br from-red-50 to-orange-50 dark:from-gray-900 dark:to-gray-800 p-8 lg:p-10 pb-16 flex flex-col">
-                <div className="flex justify-between items-center mb-6">
-                  <div className="bg-red-600 text-white font-bold px-6 py-2 rounded-full text-sm tracking-wider">
-                    LIMITED TIME OFFER
-                  </div>
-                  <button
-                    onClick={() => setShowPopup(false)}
-                    className="text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors"
-                  >
-                    <X size={28} />
-                  </button>
-                </div>
+  initial={{ scale: 0.9, y: 40, opacity: 0 }}
+  animate={{ scale: 1, y: 0, opacity: 1 }}
+  exit={{ scale: 0.9, y: 40, opacity: 0 }}
+  transition={{ duration: 0.3, ease: "easeOut" }}
+  className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-w-4xl w-full overflow-hidden flex flex-col lg:flex-row max-h-[92vh]"
+  onClick={(e) => e.stopPropagation()}
+>
+  {/* Left Side - Offer Content */}
+  <div className="lg:w-1/2 bg-gradient-to-br from-red-50 to-orange-50 dark:from-gray-900 dark:to-gray-800 p-8 lg:p-10 pb-16 flex flex-col">
+    <div className="flex justify-between items-center mb-6">
+      <div className="bg-red-600 text-white font-bold px-6 py-2 rounded-full text-sm tracking-wider">
+        LIMITED TIME OFFER
+      </div>
+      <button
+        onClick={() => setShowPopup(false)}
+        className="text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors"
+      >
+        <X size={28} />
+      </button>
+    </div>
 
-                <h2 className="text-3xl lg:text-4xl font-bold leading-tight text-gray-900 dark:text-white mb-3">
-                  Get up to <span className="text-red-600">60% OFF</span>
-                  <br />
-                  on Professional Courses
-                </h2>
-                <p className="text-lg text-red-600 font-medium mb-8">
-                  Join thousands of students who transformed their careers with
-                  us
-                </p>
+    <h2 className="text-3xl lg:text-4xl font-bold leading-tight text-gray-900 dark:text-white mb-3">
+      Get up to <span className="text-red-600">50% OFF</span>
+      <br />
+      on IT Projects & Services
+    </h2>
+    <p className="text-lg text-red-600 font-medium mb-8">
+      Trusted IT Partner for Startups & Enterprises
+    </p>
 
-                <div className="relative flex justify-center my-8">
-                  <img
-                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2070"
-                    alt="AI Knots Professional Training"
-                    className="w-56 lg:w-72 rounded-3xl shadow-2xl object-cover"
-                  />
+    <div className="relative flex justify-center my-8">
+      <img
+        src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070"
+        alt="AI Knots IT Services"
+        className="w-56 lg:w-72 rounded-3xl shadow-2xl object-cover"
+      />
 
-                  <div className="absolute -top-5 -left-5 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 text-center">
-                    <p className="text-red-600 font-semibold text-sm">
-                      ★ Top Rated
-                    </p>
-                    <p className="font-bold text-gray-900 dark:text-white text-xs mt-1">
-                      Digital Marketing Institute
-                    </p>
-                  </div>
+      <div className="absolute -top-5 -left-5 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 text-center">
+        <p className="text-red-600 font-semibold text-sm">★ Top Rated</p>
+        <p className="font-bold text-gray-900 dark:text-white text-xs mt-1">
+          AI Knots
+        </p>
+      </div>
 
-                  <div className="absolute -bottom-5 -right-5 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 text-center">
-                    <p className="text-red-600 font-bold text-sm">
-                      IT Solutions
-                    </p>
-                    <p className="font-semibold text-gray-900 dark:text-white text-xs mt-1">
-                      Software Development
-                    </p>
-                  </div>
-                </div>
+      <div className="absolute -bottom-5 -right-5 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 text-center">
+        <p className="text-red-600 font-bold text-sm">Bhopal Based</p>
+        <p className="font-semibold text-gray-900 dark:text-white text-xs mt-1">
+          Pan India Delivery
+        </p>
+      </div>
+    </div>
 
-                <div className="mt-auto grid grid-cols-2 gap-x-6 gap-y-3 text-sm text-gray-700 dark:text-gray-300">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" />{" "}
-                    Affordable Pricing
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" /> 100+
-                    Clients Served
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" /> 5000+
-                    Expert Team Support
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" /> Placement
-                    End-to-End Solutions
-                  </div>
-                </div>
-              </div>
+    <div className="mt-auto grid grid-cols-2 gap-x-6 gap-y-3 text-sm text-gray-700 dark:text-gray-300">
+      <div className="flex items-center gap-2">
+        <CheckCircle className="w-5 h-5 text-green-600" /> Web & Mobile App
+      </div>
+      <div className="flex items-center gap-2">
+        <CheckCircle className="w-5 h-5 text-green-600" /> Digital Marketing
+      </div>
+      <div className="flex items-center gap-2">
+        <CheckCircle className="w-5 h-5 text-green-600" /> 24×7 Support
+      </div>
+      <div className="flex items-center gap-2">
+        <CheckCircle className="w-5 h-5 text-green-600" /> 100+ Projects Delivered
+      </div>
+    </div>
+  </div>
 
-              {/* Right Side - Form */}
-              <div className="lg:w-1/2 bg-white dark:bg-gray-900 p-8 lg:p-10 pb-16 flex flex-col">
-                <div className="text-center mb-8">
-                  <h3 className="text-red-600 text-2xl font-bold">
-                    Join Today's Free Demo
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm">
-                    Experience live training • Limited seats
-                  </p>
-                </div>
+  {/* Right Side - Form */}
+  <div className="lg:w-1/2 bg-white dark:bg-gray-900 p-8 lg:p-10 pb-16 flex flex-col">
+    <div className="text-center mb-8">
+      <h3 className="text-red-600 text-2xl font-bold">
+        Book Free Consultation
+      </h3>
+      <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm">
+        Get expert advice • No obligation • Quick Response
+      </p>
+    </div>
 
-                <form onSubmit={handleSubmit} className="space-y-5 flex-1">
-                  <input
-                    type="text"
-                    name="usernamee"
-                    value={formData.usernamee}
-                    onChange={handleChange}
-                    placeholder="Full Name *"
-                    required
-                    disabled={loading}
-                    className="w-full px-5 py-3.5 rounded-2xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:border-red-500 outline-none"
-                  />
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Email ID *"
-                    required
-                    disabled={loading}
-                    className="w-full px-5 py-3.5 rounded-2xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:border-red-500 outline-none"
-                  />
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="Mobile Number *"
-                    required
-                    disabled={loading}
-                    className="w-full px-5 py-3.5 rounded-2xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:border-red-500 outline-none"
-                  />
+    <form onSubmit={handleSubmit} className="space-y-5 flex-1">
+      <input
+        type="text"
+        name="usernamee"
+        value={formData.usernamee}
+        onChange={handleChange}
+        placeholder="Full Name *"
+        required
+        disabled={loading}
+        className="w-full px-5 py-3.5 rounded-2xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:border-red-500 outline-none"
+      />
+      <input
+        type="email"
+        name="email"
+        value={formData.email}
+        onChange={handleChange}
+        placeholder="Email ID *"
+        required
+        disabled={loading}
+        className="w-full px-5 py-3.5 rounded-2xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:border-red-500 outline-none"
+      />
+      <input
+        type="tel"
+        name="phone"
+        value={formData.phone}
+        onChange={handleChange}
+        placeholder="Mobile Number *"
+        required
+        disabled={loading}
+        className="w-full px-5 py-3.5 rounded-2xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:border-red-500 outline-none"
+      />
 
-                  <ReCAPTCHA
-                    sitekey="6LfP7nEsAAAAAOLxpk34nW3cU3uYXON85c8n4D2H"
-                    onChange={handleCaptchaChange}
-                    theme={isDark ? "dark" : "light"}
-                  />
+      <ReCAPTCHA
+        sitekey="6LfP7nEsAAAAAOLxpk34nW3cU3uYXON85c8n4D2H"
+        onChange={handleCaptchaChange}
+        theme={isDark ? "dark" : "light"}
+      />
 
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-2xl text-lg transition-all shadow-md mt-4"
-                  >
-                    {loading ? "Submitting..." : "Register for Free Demo"}
-                  </button>
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-2xl text-lg transition-all shadow-md mt-4"
+      >
+        {loading ? "Submitting..." : "Get Free Consultation"}
+      </button>
 
-                  <p className="text-center text-xs text-gray-500 dark:text-gray-400 mt-4">
-                    ✅ No spam • 100% Free Demo • Cancel anytime
-                  </p>
-                </form>
-              </div>
-            </motion.div>
+      <p className="text-center text-xs text-gray-500 dark:text-gray-400 mt-4">
+        ✅ No spam • 100% Free Consultation • Confidential
+      </p>
+    </form>
+  </div>
+</motion.div>
           </motion.div>
         )}
       </AnimatePresence>

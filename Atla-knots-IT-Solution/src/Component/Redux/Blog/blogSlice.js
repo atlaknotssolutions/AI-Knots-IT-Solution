@@ -114,23 +114,46 @@ export const sendCommentOtp = createAsyncThunk(
   },
 );
 
-export const postCommentWithOtp = createAsyncThunk(
-  "blog/postCommentWithOtp",
-  async ({ postId, email, otp, comment }, { rejectWithValue }) => {
+export const verifyCommentOtp = createAsyncThunk(
+  "blog/verifyCommentOtp",
+  async ({ postId, email, otp }, { rejectWithValue }) => {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/product/${postId}/verify-otp`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, otp }),
+        },
+      );
+      const data = await res.json();
+      if (!data.success)
+        throw new Error(data.message || "OTP verification failed");
+      return { userId: data.userId, email };
+    } catch (err) {
+      return rejectWithValue(err.message || "Error verifying OTP");
+    }
+  },
+);
+
+export const postComment = createAsyncThunk(
+  "blog/postComment",
+  async ({ postId, email, comment }, { rejectWithValue }) => {
     try {
       const res = await fetch(
         `http://localhost:8000/api/product/${postId}/comment`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, otp, comment }),
+          body: JSON.stringify({ userEmail: email, comment }),
         },
       );
       const data = await res.json();
-      if (!data.success) throw new Error(data.message);
+      if (!data.success)
+        throw new Error(data.message || "Failed to post comment");
       return { postId, comments: data.comments };
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.message || "Error posting comment");
     }
   },
 );
@@ -220,7 +243,7 @@ const blogSlice = createSlice({
         if (post) post.likes = likes;
       })
 
-      .addCase(postCommentWithOtp.fulfilled, (state, action) => {
+      .addCase(postComment.fulfilled, (state, action) => {
         const { postId, comments } = action.payload;
         const post = state.posts.find((p) => p._id === postId);
         if (post) post.comments = comments;

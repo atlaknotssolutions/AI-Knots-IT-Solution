@@ -531,7 +531,8 @@ import {
   incrementPostView,
   togglePostLike,
   sendCommentOtp,
-  postCommentWithOtp,
+  verifyCommentOtp,
+  postComment,
 } from "../Redux/Blog/blogSlice.js";
 
 const POSTS_PER_PAGE = 6;
@@ -573,7 +574,21 @@ const Blog = () => {
   // Load saved data from localStorage
   useEffect(() => {
     const savedUser = localStorage.getItem("verifiedUser");
-    if (savedUser) setIsVerified(true);
+    if (savedUser) {
+      try {
+        const parsedUser = JSON.parse(savedUser);
+        if (parsedUser?.email) {
+          setUserInfo({
+            name: parsedUser.name || "",
+            email: parsedUser.email || "",
+            phone: parsedUser.phone || "",
+          });
+          setIsVerified(true);
+        }
+      } catch (error) {
+        console.error("Failed to parse verifiedUser from localStorage", error);
+      }
+    }
 
     const savedLikes = localStorage.getItem("userLikes");
     if (savedLikes) setUserLikes(new Set(JSON.parse(savedLikes)));
@@ -678,8 +693,13 @@ const Blog = () => {
   };
 
   const performLike = async (postId) => {
+    if (!userInfo.email) {
+      alert("Please verify with your email before liking posts.");
+      return;
+    }
+
     const result = await dispatch(
-      togglePostLike({ postId, email: userInfo.email || undefined }),
+      togglePostLike({ postId, email: userInfo.email }),
     );
     if (!result.error) {
       setUpdatedPosts((prev) => ({
@@ -699,13 +719,16 @@ const Blog = () => {
 
   const submitComment = async () => {
     if (!commentText.trim()) return alert("Please write a comment");
+    if (!userInfo.email) {
+      alert("Please verify with your email before commenting.");
+      return;
+    }
 
     setLoading(true);
     const result = await dispatch(
-      postCommentWithOtp({
+      postComment({
         postId: pendingPostId,
         email: userInfo.email,
-        otp: otp || "000000",
         comment: commentText.trim(),
       }),
     );
@@ -722,7 +745,7 @@ const Blog = () => {
       setCommentText("");
       alert("✅ Comment posted successfully!");
     } else {
-      alert("Failed to post comment");
+      alert(result.payload || "Failed to post comment");
     }
     setLoading(false);
   };
@@ -746,7 +769,28 @@ const Blog = () => {
     setLoading(false);
   };
 
-  const verifyOtp = () => {
+  const verifyOtp = async () => {
+    if (!otp.trim()) {
+      alert("Please enter the OTP first.");
+      return;
+    }
+
+    setLoading(true);
+    const result = await dispatch(
+      verifyCommentOtp({
+        postId: pendingPostId,
+        email: userInfo.email,
+        otp: otp.trim(),
+      }),
+    );
+
+    setLoading(false);
+
+    if (result.error) {
+      alert(result.payload || "Invalid OTP");
+      return;
+    }
+
     setIsVerified(true);
     localStorage.setItem(
       "verifiedUser",
