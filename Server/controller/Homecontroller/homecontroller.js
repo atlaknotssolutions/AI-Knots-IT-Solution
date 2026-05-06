@@ -25,26 +25,31 @@ const createContent = async (req, res) => {
       });
     }
 
-    // ✅ Handle Image Upload
-    if (!req.files || !req.files.images) {
+    const getFiles = () => {
+      if (!req.files) return null;
+      const keys = ["images", "image", "file", "files", "images[]"];
+      for (const key of keys) {
+        if (req.files[key]) return req.files[key];
+      }
+      const firstKey = Object.keys(req.files)[0];
+      return firstKey ? req.files[firstKey] : null;
+    };
+
+    const incomingFiles = getFiles();
+    if (!incomingFiles) {
       return res.status(400).json({
         success: false,
-        message: "At least one image is required",
+        message: "Image is required",
       });
     }
 
+    const files = Array.isArray(incomingFiles) ? incomingFiles : [incomingFiles];
     const uploadedImages = [];
-
-    const files = Array.isArray(req.files.images)
-      ? req.files.images
-      : [req.files.images];
 
     for (let file of files) {
       const uploadResponse = await imagekit.upload({
-        file: file.data,
-        fileName: `product-${Date.now()}-${file.name}`,
-        folder: "/productImages",
-        useUniqueFileName: true,
+        file: file.data.toString("base64"),
+        fileName: file.name,
       });
 
       uploadedImages.push(uploadResponse.url);
@@ -139,9 +144,8 @@ const updateHomeData = async (req, res) => {
 
       for (const file of files) {
         const uploadRes = await imagekit.upload({
-          file: file.data,
+          file: file.data.toString("base64"),
           fileName: `product-update-${Date.now()}-${file.name}`,
-          folder: "/productImages",
           useUniqueFileName: true,
         });
         uploadedImages.push(uploadRes.url);

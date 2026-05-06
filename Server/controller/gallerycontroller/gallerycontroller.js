@@ -30,9 +30,8 @@ const createContent = async (req, res) => {
 
     for (let file of files) {
       const uploadResponse = await imagekit.upload({
-        file: file.data,
+        file: file.data.toString("base64"),
         fileName: `Gallery-${Date.now()}-${file.name}`,
-        folder: "/GalleryImages",
         useUniqueFileName: true,
       });
 
@@ -51,7 +50,6 @@ const createContent = async (req, res) => {
       message: "Gallery created successfully",
       data: newGallery,
     });
-
   } catch (error) {
     console.error("Create Error:", error);
     return res.status(500).json({
@@ -61,7 +59,6 @@ const createContent = async (req, res) => {
     });
   }
 };
-
 
 // ============================
 // GET ALL Gallery
@@ -74,7 +71,6 @@ const getHomeData = async (req, res) => {
       success: true,
       data: galleries,
     });
-
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -83,7 +79,6 @@ const getHomeData = async (req, res) => {
     });
   }
 };
-
 
 // ============================
 // GET SINGLE Gallery
@@ -112,7 +107,6 @@ const getSingleContent = async (req, res) => {
       success: true,
       data: gallery,
     });
-
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -121,7 +115,6 @@ const getSingleContent = async (req, res) => {
     });
   }
 };
-
 
 // ============================
 // UPDATE Gallery
@@ -146,9 +139,8 @@ const updateHomeData = async (req, res) => {
 
       for (let file of files) {
         const uploadRes = await imagekit.upload({
-          file: file.data,
+          file: file.data.toString("base64"),
           fileName: `Gallery-update-${Date.now()}-${file.name}`,
-          folder: "/GalleryImages",
           useUniqueFileName: true,
         });
 
@@ -168,7 +160,7 @@ const updateHomeData = async (req, res) => {
     const updatedGallery = await Gallery.findByIdAndUpdate(
       id,
       { $set: updateFields },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedGallery) {
@@ -183,7 +175,6 @@ const updateHomeData = async (req, res) => {
       message: "Gallery updated successfully",
       data: updatedGallery,
     });
-
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -192,7 +183,6 @@ const updateHomeData = async (req, res) => {
     });
   }
 };
-
 
 // ============================
 // DELETE Gallery
@@ -215,7 +205,6 @@ const deletedContent = async (req, res) => {
       message: "Gallery deleted successfully",
       data: deletedGallery,
     });
-
   } catch (error) {
     return res.status(500).json({
       success: false,

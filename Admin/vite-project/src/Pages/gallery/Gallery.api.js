@@ -49,9 +49,7 @@ const API_BASE_URL = "http://localhost:8000/api/gallery";
 // Later → const API_BASE_URL = import.meta.env.VITE_API_URL + "/api/gallery";
 
 export const createGalleryItem = (formData) => {
-  return axios.post(API_BASE_URL, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  return axios.post(API_BASE_URL, formData);
 };
 
 export const getAllGalleryItems = () => {
@@ -63,9 +61,7 @@ export const getGalleryItemById = (id) => {
 };
 
 export const updateGalleryItem = (id, formData) => {
-  return axios.put(`${API_BASE_URL}/${id}`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  return axios.put(`${API_BASE_URL}/${id}`, formData);
 };
 
 export const deleteGalleryItem = (id) => {
