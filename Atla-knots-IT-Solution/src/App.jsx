@@ -45,6 +45,7 @@ import CookiePolicy from "./Component/CookiePolicy/CookiePolicy";
 import TermsOfService from "./Component/TermsOfService/TermsOfService";
 import ScrollToTop from "./Component/ScrollToTop/ScrollToTop";
 import Portfolio from "./Component/Portfolio/Portfolio";
+import TechnologyDetail from "./Technology/TechnologyDetail";
 // import ScrollToTop from "./Component/ScrollToTop";
 
 const App = () => {
@@ -70,7 +71,7 @@ const App = () => {
             <Route path="blog" element={<Blog />} />
             <Route path="blog/:id" element={<BlogDetail />} />
             <Route path="gallery" element={<Gallery />} />
-
+<Route path="/technology/:id" element={<TechnologyDetail />} />
             <Route path="digital-marketing" element={<DigitalMarketing />} />
             <Route path="seo" element={<SEO />} />
             <Route path="graphics" element={<GraphicDesigning />} />

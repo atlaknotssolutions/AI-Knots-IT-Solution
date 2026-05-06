@@ -10,7 +10,20 @@ const techSchema = new mongoose.Schema(
       required: true,
     },
     images: [{ type: String, required: true }],
+    views: { type: Number, default: 0 },
+        likes: { type: Number, default: 0 },
+        likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    
+        comments: [
+          {
+            user: { type: String, default: "Anonymous" },
+            email: { type: String },
+            comment: { type: String, required: true },
+            createdAt: { type: Date, default: Date.now },
+          },
+        ],
   },
+  
   { timestamps: true },
 );
 
