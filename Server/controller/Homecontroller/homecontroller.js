@@ -272,7 +272,9 @@ const otpStore = new Map();
 
 // Nodemailer Setup
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtpout.secureserver.net", // domain SMTP
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
