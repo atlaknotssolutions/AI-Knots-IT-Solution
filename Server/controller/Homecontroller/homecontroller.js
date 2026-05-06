@@ -420,6 +420,8 @@ const UserBlog = async (req, res) => {
   }
 };
 
+
+
 const sendOtp = async (req, res) => {
   try {
     const { email, name, phone } = req.body;
