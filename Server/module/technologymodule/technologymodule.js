@@ -12,7 +12,7 @@ const techSchema = new mongoose.Schema(
     images: [{ type: String, required: true }],
     views: { type: Number, default: 0 },
         likes: { type: Number, default: 0 },
-        likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+        likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "PopUser" }],
     
         comments: [
           {

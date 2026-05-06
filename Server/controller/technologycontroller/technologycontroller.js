@@ -359,9 +359,6 @@ const sendOtp = async (req, res) => {
   }
 };
 
-// ======================
-// VERIFY OTP & ADD COMMENT
-// ======================
 const verifyOtpAndComment = async (req, res) => {
   try {
     const { id } = req.params;
