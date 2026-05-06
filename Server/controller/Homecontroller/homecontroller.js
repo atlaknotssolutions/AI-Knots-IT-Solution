@@ -43,7 +43,9 @@ const createContent = async (req, res) => {
       });
     }
 
-    const files = Array.isArray(incomingFiles) ? incomingFiles : [incomingFiles];
+    const files = Array.isArray(incomingFiles)
+      ? incomingFiles
+      : [incomingFiles];
     const uploadedImages = [];
 
     for (let file of files) {
