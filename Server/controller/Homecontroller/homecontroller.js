@@ -265,10 +265,197 @@ const getSingleContent = async (req, res) => {
 };
 
 
+// ======================
+// INCREMENT VIEW
+// ======================
+const incrementView = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updated = await Product.findByIdAndUpdate(
+      id,
+      { $inc: { views: 1 } },
+      { new: true }
+    ).populate("category", "name");
+
+    res.status(200).json({ success: true, views: updated.views });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ======================
+// LIKE / UNLIKE
+// ======================
+const toggleLike = async (req, res) => {
+  try {
+    const { id } = req.params;
+    // For now using simple count. You can improve with user ID later.
+    const post = await Product.findById(id);
+
+    if (!post) return res.status(404).json({ success: false, message: "Post not found" });
+
+    // Simple toggle (you can make it user-specific later)
+    const isLiked = false; // Placeholder
+    if (isLiked) {
+      post.likes = Math.max(0, post.likes - 1);
+    } else {
+      post.likes += 1;
+    }
+
+    await post.save();
+    res.status(200).json({ success: true, likes: post.likes });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ======================
+// ADD COMMENT
+// ======================
+const addComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { comment, user = "Anonymous" } = req.body;
+
+    if (!comment) {
+      return res.status(400).json({ success: false, message: "Comment is required" });
+    }
+
+    const post = await Product.findByIdAndUpdate(
+      id,
+      {
+        $push: {
+          comments: { user, comment },
+        },
+      },
+      { new: true }
+    ).populate("category", "name");
+
+    res.status(201).json({
+      success: true,
+      message: "Comment added",
+      comments: post.comments,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+const nodemailer = require("nodemailer");
+const otpGenerator = require("otp-generator");
+
+// Store OTPs temporarily (In production use Redis)
+const otpStore = new Map(); // { email: { otp, expires } }
+
+// Nodemailer Setup (Use your Gmail / Brevo / Resend)
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// ======================
+// SEND OTP
+// ======================
+const sendOtp = async (req, res) => {
+  try {
+    const { email, name } = req.body;
+
+    if (!email || !name) {
+      return res.status(400).json({ success: false, message: "Name and Email are required" });
+    }
+
+    const otp = otpGenerator.generate(6, { 
+      upperCaseAlphabets: false, 
+      specialChars: false 
+    });
+
+    otpStore.set(email, {
+      otp,
+      name,
+      expires: Date.now() + 10 * 60 * 1000 // 10 minutes
+    });
+
+    await transporter.sendMail({
+      from: `"Your Blog" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Your OTP for Comment Verification",
+      html: `
+        <h2>Hello ${name},</h2>
+        <p>Your OTP for commenting is: <strong>${otp}</strong></p>
+        <p>This OTP will expire in 10 minutes.</p>
+      `
+    });
+
+    res.status(200).json({ success: true, message: "OTP sent successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Failed to send OTP" });
+  }
+};
+
+// ======================
+// VERIFY OTP & POST COMMENT
+// ======================
+const verifyOtpAndComment = async (req, res) => {
+  try {
+    const { id } = req.params;           // post id
+    const { email, otp, comment } = req.body;
+
+    if (!email || !otp || !comment) {
+      return res.status(400).json({ success: false, message: "All fields required" });
+    }
+
+    const stored = otpStore.get(email);
+    if (!stored || stored.expires < Date.now()) {
+      return res.status(400).json({ success: false, message: "OTP expired or invalid" });
+    }
+
+    if (stored.otp !== otp) {
+      return res.status(400).json({ success: false, message: "Invalid OTP" });
+    }
+
+    // OTP Verified → Save Comment
+    const post = await Product.findByIdAndUpdate(
+      id,
+      {
+        $push: {
+          comments: {
+            user: stored.name,
+            email: email,
+            comment: comment,
+          },
+        },
+      },
+      { new: true }
+    );
+
+    // Clear OTP after use
+    otpStore.delete(email);
+
+    res.status(201).json({
+      success: true,
+      message: "Comment posted successfully",
+      comments: post.comments,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
 module.exports = {
   createContent,
   getHomeData,
   getSingleContent,
   deletedContent,
   updateHomeData,
+  incrementView,     // ← New
+  toggleLike,        // ← New
+  addComment,
+  sendOtp,
+  verifyOtpAndComment,        // ← New
 };

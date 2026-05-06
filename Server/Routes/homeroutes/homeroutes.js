@@ -5,7 +5,10 @@ const {
   getHomeData,
     updateHomeData,
     deletedContent,
-    getSingleContent
+    getSingleContent,
+    incrementView,
+    toggleLike,
+    addComment
 
 } = require("../../controller/Homecontroller/homecontroller");
 
@@ -17,4 +20,8 @@ router.get("/product/:id", getSingleContent);
 router.delete("/product/:id",deletedContent)
 router.put("/updatehome/:id", updateHomeData);
 
+
+router.post("/:id/view", incrementView);
+router.post("/:id/like", toggleLike);
+router.post("/:id/comment", addComment);
 module.exports = router;
