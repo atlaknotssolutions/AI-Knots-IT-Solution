@@ -222,12 +222,13 @@ const deletedContent = async (req, res) => {
   }
 };
 
+
 const getSingleContent = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Validate MongoDB ObjectId format (optional but good practice)
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+    // Validate MongoDB ObjectId
+    if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(400).json({
         success: false,
         message: "Invalid product ID format",
@@ -237,9 +238,13 @@ const getSingleContent = async (req, res) => {
     const product = await Product.findById(id)
       .populate({
         path: "category",
-        select: "name description", // bring only needed fields (add more if required)
+        select: "name description slug", // added slug if needed
       })
-      .lean(); // faster + plain object (good for API responses)
+      .populate({
+        path: "comments.user",
+        select: "name email avatar", // better fields
+      })
+      .lean(); // Convert to plain JS object (faster)
 
     if (!product) {
       return res.status(404).json({
@@ -247,6 +252,9 @@ const getSingleContent = async (req, res) => {
         message: "Product not found",
       });
     }
+
+    // Optional: Increase view count
+    // await Product.findByIdAndUpdate(id, { $inc: { views: 1 } });
 
     return res.status(200).json({
       success: true,
@@ -257,11 +265,58 @@ const getSingleContent = async (req, res) => {
     console.error("GET SINGLE PRODUCT ERROR:", error);
     return res.status(500).json({
       success: false,
-      message: "Failed to fetch product details",
-      error: error.message,
+      message: "Server error while fetching product",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
+
+// export default getSingleProduct;
+
+// const getSingleContent = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     // Validate MongoDB ObjectId format (optional but good practice)
+//     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid product ID format",
+//       });
+//     }
+
+//     const product = await Product.findById(id)
+//       .populate({
+//         path: "category",
+//         select: "name description", // bring only needed fields (add more if required)
+//       })
+//       .populate({
+//         path: "comments.user",
+//         select: "user email",
+//       })
+//       .lean(); // faster + plain object (good for API responses)
+
+//     if (!product) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Product not found",
+//       });
+//     }
+
+//     return res.status(200).json({
+//       success: true,
+//       message: "Product fetched successfully",
+//       data: product,
+//     });
+//   } catch (error) {
+//     console.error("GET SINGLE PRODUCT ERROR:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch product details",
+//       error: error.message,
+//     });
+//   }
+// };
 
 // Nodemailer Setup
 const transporter = nodemailer.createTransport({
@@ -419,8 +474,6 @@ const UserBlog = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to create user" });
   }
 };
-
-
 
 const sendOtp = async (req, res) => {
   try {
