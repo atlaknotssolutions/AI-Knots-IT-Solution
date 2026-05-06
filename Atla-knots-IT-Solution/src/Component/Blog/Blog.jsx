@@ -1,5 +1,3 @@
-
-
 // import React, { useEffect, useState } from "react";
 // import { useSelector, useDispatch } from "react-redux";
 // import DOMPurify from "dompurify";
@@ -519,7 +517,6 @@
 
 // export default Blog;
 
-
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import DOMPurify from "dompurify";
@@ -608,7 +605,10 @@ const Blog = () => {
   const totalPosts = filteredPosts.length;
   const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
   const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
-  const currentPosts = filteredPosts.slice(startIndex, startIndex + POSTS_PER_PAGE);
+  const currentPosts = filteredPosts.slice(
+    startIndex,
+    startIndex + POSTS_PER_PAGE,
+  );
 
   const goToPage = (page) => {
     if (page >= 1 && page <= totalPages) {
@@ -643,7 +643,7 @@ const Blog = () => {
     if (action === "read") {
       // Increment view count
       setViewLoadingIds((prev) => new Set(prev).add(postId));
-      
+
       dispatch(incrementPostView(postId));
 
       // Navigate after a small delay so backend gets the request
@@ -678,7 +678,9 @@ const Blog = () => {
   };
 
   const performLike = async (postId) => {
-    const result = await dispatch(togglePostLike(postId));
+    const result = await dispatch(
+      togglePostLike({ postId, email: userInfo.email || undefined }),
+    );
     if (!result.error) {
       setUpdatedPosts((prev) => ({
         ...prev,
@@ -705,7 +707,7 @@ const Blog = () => {
         email: userInfo.email,
         otp: otp || "000000",
         comment: commentText.trim(),
-      })
+      }),
     );
 
     if (!result.error) {
@@ -732,14 +734,24 @@ const Blog = () => {
     }
 
     setLoading(true);
-    await dispatch(sendCommentOtp({ postId: pendingPostId, name: userInfo.name, email: userInfo.email }));
+    await dispatch(
+      sendCommentOtp({
+        postId: pendingPostId,
+        name: userInfo.name,
+        email: userInfo.email,
+        phone: userInfo.phone,
+      }),
+    );
     setStep("otp");
     setLoading(false);
   };
 
   const verifyOtp = () => {
     setIsVerified(true);
-    localStorage.setItem("verifiedUser", JSON.stringify({ ...userInfo, verifiedAt: new Date().toISOString() }));
+    localStorage.setItem(
+      "verifiedUser",
+      JSON.stringify({ ...userInfo, verifiedAt: new Date().toISOString() }),
+    );
     setShowVerifyModal(false);
 
     if (pendingPostId) {
@@ -751,7 +763,9 @@ const Blog = () => {
 
   if (status === "loading") {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${isDark ? "bg-black text-white" : "bg-gray-50 text-gray-900"}`}>
+      <div
+        className={`min-h-screen flex items-center justify-center ${isDark ? "bg-black text-white" : "bg-gray-50 text-gray-900"}`}
+      >
         <div className="text-2xl animate-pulse">Loading blogs...</div>
       </div>
     );
@@ -759,17 +773,22 @@ const Blog = () => {
 
   if (status === "failed") {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${isDark ? "bg-black text-red-400" : "bg-gray-50 text-red-600"}`}>
+      <div
+        className={`min-h-screen flex items-center justify-center ${isDark ? "bg-black text-red-400" : "bg-gray-50 text-red-600"}`}
+      >
         <div className="text-xl">Error: {error}</div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen ${isDark ? "bg-black text-white" : "bg-white text-gray-900"} font-sans`}>
-
+    <div
+      className={`min-h-screen ${isDark ? "bg-black text-white" : "bg-white text-gray-900"} font-sans`}
+    >
       {/* Header with Category Filters */}
-      <header className={`border-b sticky top-0 z-10 backdrop-blur-md ${isDark ? "border-gray-800 bg-black/90" : "border-gray-200 bg-white/90"}`}>
+      <header
+        className={`border-b sticky top-0 z-10 backdrop-blur-md ${isDark ? "border-gray-800 bg-black/90" : "border-gray-200 bg-white/90"}`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-wrap gap-3 justify-center md:justify-start">
             {categories.map((cat) => (
@@ -780,8 +799,8 @@ const Blog = () => {
                   activeCategory === cat
                     ? "bg-red-600 text-white shadow-lg shadow-red-600/40"
                     : isDark
-                    ? "bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-red-600/50"
-                    : "bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 hover:border-red-600"
+                      ? "bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-red-600/50"
+                      : "bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 hover:border-red-600"
                 }`}
               >
                 {cat}
@@ -793,8 +812,11 @@ const Blog = () => {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {filteredPosts.length === 0 ? (
-          <div className={`text-center py-24 text-2xl ${isDark ? "text-gray-400" : "text-gray-600"}`}>
-            No posts found in <span className="text-red-500">"{activeCategory}"</span>
+          <div
+            className={`text-center py-24 text-2xl ${isDark ? "text-gray-400" : "text-gray-600"}`}
+          >
+            No posts found in{" "}
+            <span className="text-red-500">"{activeCategory}"</span>
           </div>
         ) : (
           <>
@@ -818,34 +840,59 @@ const Blog = () => {
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                       ) : (
-                        <div className={`absolute inset-0 flex items-center justify-center ${isDark ? "bg-gray-800" : "bg-gray-100"}`}>
-                          <span className={isDark ? "text-gray-600" : "text-gray-400"}>No Image</span>
+                        <div
+                          className={`absolute inset-0 flex items-center justify-center ${isDark ? "bg-gray-800" : "bg-gray-100"}`}
+                        >
+                          <span
+                            className={
+                              isDark ? "text-gray-600" : "text-gray-400"
+                            }
+                          >
+                            No Image
+                          </span>
                         </div>
                       )}
                     </div>
 
                     {/* Content */}
                     <div className="p-6 flex flex-col flex-grow">
-                      <span className={`inline-block px-3 py-1 mb-3 text-xs rounded-full w-fit ${isDark ? "bg-gray-800 text-gray-300" : "bg-gray-200 text-gray-700"}`}>
+                      <span
+                        className={`inline-block px-3 py-1 mb-3 text-xs rounded-full w-fit ${isDark ? "bg-gray-800 text-gray-300" : "bg-gray-200 text-gray-700"}`}
+                      >
                         {post.category?.name || "Uncategorized"}
                       </span>
 
-                      <h2 className={`text-xl font-bold mb-2 line-clamp-2 group-hover:text-red-500 transition-colors ${isDark ? "text-white" : "text-gray-900"}`}>
+                      <h2
+                        className={`text-xl font-bold mb-2 line-clamp-2 group-hover:text-red-500 transition-colors ${isDark ? "text-white" : "text-gray-900"}`}
+                      >
                         {post.title || post.name || "Untitled"}
                       </h2>
 
-                      <p className={`text-sm mb-3 ${isDark ? "text-gray-400" : "text-gray-600"}`}>
-                        By <span className={isDark ? "text-gray-200" : "text-gray-800"}>{post.author || "Anonymous"}</span>
+                      <p
+                        className={`text-sm mb-3 ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                      >
+                        By{" "}
+                        <span
+                          className={isDark ? "text-gray-200" : "text-gray-800"}
+                        >
+                          {post.author || "Anonymous"}
+                        </span>
                       </p>
 
                       <div
                         className={`text-sm mb-6 line-clamp-3 flex-grow ${isDark ? "text-gray-400" : "text-gray-600"}`}
-                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.description || post.excerpt || "") }}
+                        dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(
+                            post.description || post.excerpt || "",
+                          ),
+                        }}
                       />
 
                       {/* Stats & Read More */}
                       <div className="mt-auto pt-4 flex justify-between items-center">
-                        <div className={`flex items-center gap-5 text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                        <div
+                          className={`flex items-center gap-5 text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                        >
                           <div className="flex items-center gap-1">
                             <Eye className="w-5 h-5" /> {post.views || 0}
                           </div>
@@ -853,13 +900,17 @@ const Blog = () => {
                             className={`flex items-center gap-1 cursor-pointer transition-colors ${hasLiked ? "text-red-500" : "hover:text-red-500"}`}
                             onClick={() => handleAction("like", post._id)}
                           >
-                            <Heart className={`w-5 h-5 ${hasLiked ? "fill-current" : ""}`} /> {post.likes || 0}
+                            <Heart
+                              className={`w-5 h-5 ${hasLiked ? "fill-current" : ""}`}
+                            />{" "}
+                            {post.likes || 0}
                           </div>
                           <div
                             className="flex items-center gap-1 cursor-pointer hover:text-red-500 transition-colors"
                             onClick={() => handleAction("comment", post._id)}
                           >
-                            <MessageCircle className="w-5 h-5" /> {post.comments?.length || 0}
+                            <MessageCircle className="w-5 h-5" />{" "}
+                            {post.comments?.length || 0}
                           </div>
                         </div>
 
@@ -867,9 +918,11 @@ const Blog = () => {
                           onClick={() => handleAction("read", post._id)}
                           disabled={isViewLoading}
                           className={`inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-lg transition-all duration-300 hover:translate-x-1
-                            ${isDark
-                              ? "bg-red-900/30 border border-red-700/50 text-red-300 hover:bg-red-800/50 hover:border-red-600"
-                              : "bg-red-100 border border-red-200 text-red-600 hover:bg-red-200"}
+                            ${
+                              isDark
+                                ? "bg-red-900/30 border border-red-700/50 text-red-300 hover:bg-red-800/50 hover:border-red-600"
+                                : "bg-red-100 border border-red-200 text-red-600 hover:bg-red-200"
+                            }
                             ${isViewLoading ? "opacity-70 cursor-wait" : ""}`}
                         >
                           {isViewLoading ? "Opening..." : "Read More →"}
@@ -890,8 +943,12 @@ const Blog = () => {
                     disabled={currentPage === 1}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
                       currentPage === 1
-                        ? isDark ? "bg-gray-800 text-gray-500 cursor-not-allowed" : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                        : isDark ? "bg-gray-800 hover:bg-gray-700 border-gray-700" : "bg-gray-100 hover:bg-gray-200 border-gray-300"
+                        ? isDark
+                          ? "bg-gray-800 text-gray-500 cursor-not-allowed"
+                          : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                        : isDark
+                          ? "bg-gray-800 hover:bg-gray-700 border-gray-700"
+                          : "bg-gray-100 hover:bg-gray-200 border-gray-300"
                     }`}
                   >
                     ← Previous
@@ -904,12 +961,14 @@ const Blog = () => {
                       disabled={page === "..."}
                       className={`min-w-[2.5rem] h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-all ${
                         page === "..."
-                          ? isDark ? "text-gray-500" : "text-gray-400"
+                          ? isDark
+                            ? "text-gray-500"
+                            : "text-gray-400"
                           : page === currentPage
-                          ? "bg-red-600 text-white shadow-lg"
-                          : isDark
-                          ? "bg-gray-800 hover:bg-gray-700 border border-gray-700"
-                          : "bg-gray-100 hover:bg-gray-200 border border-gray-300"
+                            ? "bg-red-600 text-white shadow-lg"
+                            : isDark
+                              ? "bg-gray-800 hover:bg-gray-700 border border-gray-700"
+                              : "bg-gray-100 hover:bg-gray-200 border border-gray-300"
                       }`}
                     >
                       {page}
@@ -921,15 +980,21 @@ const Blog = () => {
                     disabled={currentPage === totalPages}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
                       currentPage === totalPages
-                        ? isDark ? "bg-gray-800 text-gray-500 cursor-not-allowed" : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                        : isDark ? "bg-gray-800 hover:bg-gray-700 border-gray-700" : "bg-gray-100 hover:bg-gray-200 border-gray-300"
+                        ? isDark
+                          ? "bg-gray-800 text-gray-500 cursor-not-allowed"
+                          : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                        : isDark
+                          ? "bg-gray-800 hover:bg-gray-700 border-gray-700"
+                          : "bg-gray-100 hover:bg-gray-200 border-gray-300"
                     }`}
                   >
                     Next →
                   </button>
                 </nav>
 
-                <div className={`text-sm ${isDark ? "text-gray-500" : "text-gray-400"}`}>
+                <div
+                  className={`text-sm ${isDark ? "text-gray-500" : "text-gray-400"}`}
+                >
                   Page {currentPage} of {totalPages} • {totalPosts} posts
                 </div>
               </div>
@@ -941,7 +1006,9 @@ const Blog = () => {
       {/* Comment Modal */}
       {showCommentModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className={`max-w-lg w-full rounded-2xl p-6 ${isDark ? "bg-gray-900" : "bg-white"} shadow-2xl`}>
+          <div
+            className={`max-w-lg w-full rounded-2xl p-6 ${isDark ? "bg-gray-900" : "bg-white"} shadow-2xl`}
+          >
             <div className="flex justify-between items-center mb-5">
               <h2 className="text-2xl font-bold">Write a Comment</h2>
               <button onClick={() => setShowCommentModal(false)}>
@@ -955,7 +1022,9 @@ const Blog = () => {
               placeholder="What are your thoughts?"
               rows={5}
               className={`w-full p-4 rounded-xl border resize-y min-h-[120px] focus:outline-none focus:ring-2 focus:ring-red-500 ${
-                isDark ? "bg-gray-800 border-gray-700 text-white" : "bg-gray-50 border-gray-300"
+                isDark
+                  ? "bg-gray-800 border-gray-700 text-white"
+                  : "bg-gray-50 border-gray-300"
               }`}
             />
 
@@ -970,10 +1039,16 @@ const Blog = () => {
                 onClick={submitComment}
                 disabled={loading || !commentText.trim()}
                 className={`flex-1 py-3 rounded-xl font-medium text-white flex items-center justify-center ${
-                  commentText.trim() ? "bg-red-600 hover:bg-red-700" : "bg-gray-400 cursor-not-allowed"
+                  commentText.trim()
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-gray-400 cursor-not-allowed"
                 }`}
               >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Post Comment"}
+                {loading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  "Post Comment"
+                )}
               </button>
             </div>
           </div>
@@ -983,7 +1058,9 @@ const Blog = () => {
       {/* Verification Modal */}
       {showVerifyModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className={`max-w-md w-full rounded-2xl p-8 ${isDark ? "bg-gray-900" : "bg-white"} shadow-2xl`}>
+          <div
+            className={`max-w-md w-full rounded-2xl p-8 ${isDark ? "bg-gray-900" : "bg-white"} shadow-2xl`}
+          >
             <h2 className="text-2xl font-bold mb-6 text-center">
               {step === "form" ? "Verify Yourself" : "Enter OTP"}
             </h2>
@@ -994,21 +1071,27 @@ const Blog = () => {
                   type="text"
                   placeholder="Full Name"
                   value={userInfo.name}
-                  onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
+                  onChange={(e) =>
+                    setUserInfo({ ...userInfo, name: e.target.value })
+                  }
                   className={`w-full p-3 rounded-lg mb-4 border ${isDark ? "bg-gray-800 border-gray-700" : "bg-gray-50 border-gray-300"}`}
                 />
                 <input
                   type="email"
                   placeholder="Email Address"
                   value={userInfo.email}
-                  onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
+                  onChange={(e) =>
+                    setUserInfo({ ...userInfo, email: e.target.value })
+                  }
                   className={`w-full p-3 rounded-lg mb-4 border ${isDark ? "bg-gray-800 border-gray-700" : "bg-gray-50 border-gray-300"}`}
                 />
                 <input
                   type="tel"
                   placeholder="Phone Number (Optional)"
                   value={userInfo.phone}
-                  onChange={(e) => setUserInfo({ ...userInfo, phone: e.target.value })}
+                  onChange={(e) =>
+                    setUserInfo({ ...userInfo, phone: e.target.value })
+                  }
                   className={`w-full p-3 rounded-lg mb-6 border ${isDark ? "bg-gray-800 border-gray-700" : "bg-gray-50 border-gray-300"}`}
                 />
 

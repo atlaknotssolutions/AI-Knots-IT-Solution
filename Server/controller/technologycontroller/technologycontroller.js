@@ -1,10 +1,9 @@
-
-
 const techModel = require("../../module/technologymodule/technologymodule.js");
 const categoryModel = require("../../module/technologymodule/categorymodule.js");
 const imagekit = require("../../utils/imagekit.js");
 const nodemailer = require("nodemailer");
 const otpGenerator = require("otp-generator");
+const PopUser = require("../../module/popmodule.js");
 
 // ================= CREATE TECH =================
 const createTech = async (req, res) => {
@@ -56,7 +55,7 @@ const createTech = async (req, res) => {
       category: categoryExists._id,
       images: uploadedImages,
     });
-    console.log(newTech,"newTechnewTechnewTech")
+    console.log(newTech, "newTechnewTechnewTech");
     await newTech.save();
 
     res.status(201).json({
@@ -64,7 +63,6 @@ const createTech = async (req, res) => {
       message: "Tech created successfully",
       data: newTech,
     });
-
   } catch (error) {
     console.error("Error creating tech:", error);
     res.status(500).json({
@@ -73,7 +71,6 @@ const createTech = async (req, res) => {
     });
   }
 };
-
 
 // ================= UPDATE TECH =================
 const updateTech = async (req, res) => {
@@ -105,7 +102,7 @@ const updateTech = async (req, res) => {
     const updatedTech = await techModel.findByIdAndUpdate(
       id,
       { $set: updateFields },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedTech) {
@@ -120,7 +117,6 @@ const updateTech = async (req, res) => {
       message: "Tech content updated successfully",
       data: updatedTech,
     });
-
   } catch (error) {
     console.error("Error updating tech content:", error);
     res.status(500).json({
@@ -130,23 +126,20 @@ const updateTech = async (req, res) => {
   }
 };
 
-
 // ================= GET TECH =================
 const getTechData = async (req, res) => {
   try {
-
     const techData = await techModel
       .find()
       .populate("category", "name")
       .sort({ createdAt: -1 });
-// console.log(techData,"techDatatechData")
+    // console.log(techData,"techDatatechData")
     res.status(200).json({
       success: true,
       count: techData.length,
       message: "Tech data fetched successfully",
       data: techData,
     });
-
   } catch (error) {
     console.error("Error fetching tech data:", error);
     res.status(500).json({
@@ -155,7 +148,6 @@ const getTechData = async (req, res) => {
     });
   }
 };
-
 
 // ================= DELETE TECH =================
 const deleteTech = async (req, res) => {
@@ -175,7 +167,6 @@ const deleteTech = async (req, res) => {
       success: true,
       message: "Tech content deleted successfully",
     });
-
   } catch (error) {
     console.error("Error deleting tech content:", error);
     res.status(500).json({
@@ -184,13 +175,6 @@ const deleteTech = async (req, res) => {
     });
   }
 };
-
-
-
-
-
-
-const otpStore = new Map();
 
 // Nodemailer Setup
 const transporter = nodemailer.createTransport({
@@ -210,14 +194,14 @@ const incrementView = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const updated = await techModel.findByIdAndUpdate(
-      id,
-      { $inc: { views: 1 } },
-      { new: true }
-    ).populate("category", "name");
+    const updated = await techModel
+      .findByIdAndUpdate(id, { $inc: { views: 1 } }, { new: true })
+      .populate("category", "name");
 
     if (!updated) {
-      return res.status(404).json({ success: false, message: "Post not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
     }
 
     res.status(200).json({ success: true, views: updated.views });
@@ -229,21 +213,33 @@ const incrementView = async (req, res) => {
 const addComment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { comment, user = "Anonymous" } = req.body;
+    const { comment, userEmail } = req.body;
 
     if (!comment) {
-      return res.status(400).json({ success: false, message: "Comment is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Comment is required" });
     }
 
-    const post = await techModel.findByIdAndUpdate(
-      id,
-      {
-        $push: {
-          comments: { user, comment },
+    let user = null;
+    if (userEmail) {
+      user = await PopUser.findOne({ email: userEmail.toLowerCase().trim() });
+    }
+
+    const post = await techModel
+      .findByIdAndUpdate(
+        id,
+        {
+          $push: {
+            comments: {
+              user: user ? user._id : null,
+              comment,
+            },
+          },
         },
-      },
-      { new: true }
-    ).populate("category", "name");
+        { new: true },
+      )
+      .populate("category", "name");
 
     res.status(201).json({
       success: true,
@@ -260,26 +256,54 @@ const addComment = async (req, res) => {
 const toggleLike = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user?.id; // If you have auth middleware
+    const { email, userId } = req.body;
+
+    let user = null;
+    if (userId) {
+      user = await PopUser.findById(userId);
+    } else if (email) {
+      user = await PopUser.findOne({ email: email.toLowerCase().trim() });
+    }
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "User email or userId is required for liking",
+        });
+    }
 
     const post = await techModel.findById(id);
     if (!post) {
-      return res.status(404).json({ success: false, message: "Post not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
     }
 
-    const hasLiked = post.likedBy.includes(userId);
+    const hasLiked = post.likedBy.some(
+      (uid) => uid.toString() === user._id.toString(),
+    );
 
     if (hasLiked) {
-      // Unlike
-      post.likedBy = post.likedBy.filter((uid) => uid.toString() !== userId);
+      post.likedBy = post.likedBy.filter(
+        (uid) => uid.toString() !== user._id.toString(),
+      );
       post.likes = Math.max(0, post.likes - 1);
+      user.likedPosts = user.likedPosts.filter(
+        (pid) => pid.toString() !== post._id.toString(),
+      );
     } else {
-      // Like
-      post.likedBy.push(userId);
+      post.likedBy.push(user._id);
       post.likes += 1;
+      if (
+        !user.likedPosts.some((pid) => pid.toString() === post._id.toString())
+      ) {
+        user.likedPosts.push(post._id);
+      }
     }
 
-    await post.save();
+    await Promise.all([post.save(), user.save()]);
 
     res.status(200).json({
       success: true,
@@ -299,20 +323,19 @@ const toggleLike = async (req, res) => {
 // ======================
 const sendOtp = async (req, res) => {
   try {
-    const { email, name } = req.body;
+    const { email, name, phone } = req.body;
 
-    if (!email || !name) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Name and Email are required" 
+    if (!email || !name || !phone) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, and phone are required",
       });
     }
 
-    // Validate email format
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Invalid email format" 
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email format",
       });
     }
 
@@ -322,39 +345,44 @@ const sendOtp = async (req, res) => {
       digits: true,
     });
 
-    otpStore.set(email, {
-      otp,
-      name,
-      expires: Date.now() + 10 * 60 * 1000, // 10 minutes
-    });
+    const user = await PopUser.findOneAndUpdate(
+      { email: email.toLowerCase().trim() },
+      {
+        user: name.trim(),
+        email: email.toLowerCase().trim(),
+        phone: phone.trim(),
+        otp,
+        expires: Date.now() + 10 * 60 * 1000,
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    );
 
     await transporter.sendMail({
       from: `"Your Blog" <${process.env.EMAIL_USER}>`,
-      to: email,
+      to: user.email,
       subject: "Your OTP for Comment Verification",
       html: `
-        <h2>Hello ${name},</h2>
+        <h2>Hello ${user.user},</h2>
         <p>Your OTP for commenting is: <strong>${otp}</strong></p>
         <p>This OTP will expire in 10 minutes.</p>
         <p>Thank you for engaging with our blog!</p>
-      `
+      `,
     });
 
-    console.log(`✅ OTP sent to ${email} → ${otp}`);
+    console.log(`✅ OTP sent to ${user.email} → ${otp}`);
 
-    res.status(200).json({ 
-      success: true, 
-      message: "OTP sent successfully" 
+    res.status(200).json({
+      success: true,
+      message: "OTP sent successfully",
+      userId: user._id,
     });
-
   } catch (error) {
     console.error("❌ Send OTP Error:", error);
-    
-    // Better error message for debugging
-    res.status(500).json({ 
-      success: false, 
+
+    res.status(500).json({
+      success: false,
       message: "Failed to send OTP. Please check server logs.",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -365,37 +393,46 @@ const verifyOtpAndComment = async (req, res) => {
     const { email, otp, comment } = req.body;
 
     if (!email || !otp || !comment) {
-      return res.status(400).json({ success: false, message: "All fields are required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required" });
     }
 
-    const stored = otpStore.get(email);
-    if (!stored || stored.expires < Date.now()) {
-      return res.status(400).json({ success: false, message: "OTP expired or invalid" });
+    const user = await PopUser.findOne({ email: email.toLowerCase().trim() });
+    if (!user || !user.otp || !user.expires || user.expires < Date.now()) {
+      return res
+        .status(400)
+        .json({ success: false, message: "OTP expired or invalid" });
     }
-    if (stored.otp !== otp) {
+    if (user.otp !== otp) {
       return res.status(400).json({ success: false, message: "Invalid OTP" });
     }
 
-    const post = await techModel.findByIdAndUpdate(
-      id,
-      {
-        $push: {
-          comments: {
-            user: stored.name,
-            email: email,
-            comment: comment.trim(),
+    const post = await techModel
+      .findByIdAndUpdate(
+        id,
+        {
+          $push: {
+            comments: {
+              user: user._id,
+              comment: comment.trim(),
+            },
           },
         },
-      },
-      { new: true }
-    ).populate("category", "name");
+        { new: true },
+      )
+      .populate("category", "name");
 
     if (!post) {
-      return res.status(404).json({ success: false, message: "Post not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
     }
 
-    // Clean up OTP
-    otpStore.delete(email);
+    user.comments.push({ postId: post._id, comment: comment.trim() });
+    user.otp = null;
+    user.expires = null;
+    await user.save();
 
     res.status(201).json({
       success: true,
@@ -406,8 +443,6 @@ const verifyOtpAndComment = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-
 
 const getSingleContent = async (req, res) => {
   try {
@@ -421,7 +456,8 @@ const getSingleContent = async (req, res) => {
       });
     }
 
-    const product = await techModel.findById(id)
+    const product = await techModel
+      .findById(id)
       .populate({
         path: "category",
         select: "name description", // bring only needed fields (add more if required)
@@ -449,7 +485,6 @@ const getSingleContent = async (req, res) => {
     });
   }
 };
-
 
 module.exports = {
   createTech,

@@ -257,8 +257,6 @@ const getSingleContent = async (req, res) => {
   }
 };
 
-const otpStore = new Map();
-
 // Nodemailer Setup
 const transporter = nodemailer.createTransport({
   host: "smtpout.secureserver.net", // domain SMTP
@@ -298,7 +296,7 @@ const incrementView = async (req, res) => {
 const addComment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { comment, user = "Anonymous" } = req.body;
+    const { comment, userEmail } = req.body;
 
     if (!comment) {
       return res
@@ -306,11 +304,19 @@ const addComment = async (req, res) => {
         .json({ success: false, message: "Comment is required" });
     }
 
+    let user = null;
+    if (userEmail) {
+      user = await PopUser.findOne({ email: userEmail.toLowerCase().trim() });
+    }
+
     const post = await Product.findByIdAndUpdate(
       id,
       {
         $push: {
-          comments: { user, comment },
+          comments: {
+            user: user ? user._id : null,
+            comment,
+          },
         },
       },
       { new: true },
@@ -331,7 +337,21 @@ const addComment = async (req, res) => {
 const toggleLike = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user?.id; // If you have auth middleware
+    const { email, userId } = req.body;
+
+    let user = null;
+    if (userId) {
+      user = await PopUser.findById(userId);
+    } else if (email) {
+      user = await PopUser.findOne({ email: email.toLowerCase().trim() });
+    }
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User email or userId is required for liking",
+      });
+    }
 
     const post = await Product.findById(id);
     if (!post) {
@@ -340,19 +360,29 @@ const toggleLike = async (req, res) => {
         .json({ success: false, message: "Post not found" });
     }
 
-    const hasLiked = post.likedBy.includes(userId);
+    const hasLiked = post.likedBy.some(
+      (uid) => uid.toString() === user._id.toString(),
+    );
 
     if (hasLiked) {
-      // Unlike
-      post.likedBy = post.likedBy.filter((uid) => uid.toString() !== userId);
+      post.likedBy = post.likedBy.filter(
+        (uid) => uid.toString() !== user._id.toString(),
+      );
       post.likes = Math.max(0, post.likes - 1);
+      user.likedPosts = user.likedPosts.filter(
+        (pid) => pid.toString() !== post._id.toString(),
+      );
     } else {
-      // Like
-      post.likedBy.push(userId);
+      post.likedBy.push(user._id);
       post.likes += 1;
+      if (
+        !user.likedPosts.some((pid) => pid.toString() === post._id.toString())
+      ) {
+        user.likedPosts.push(post._id);
+      }
     }
 
-    await post.save();
+    await Promise.all([post.save(), user.save()]);
 
     res.status(200).json({
       success: true,
@@ -363,7 +393,6 @@ const toggleLike = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
 
 const UserBlog = async (req, res) => {
   try {
@@ -387,16 +416,15 @@ const UserBlog = async (req, res) => {
 
 const sendOtp = async (req, res) => {
   try {
-    const { email, name } = req.body;
+    const { email, name, phone } = req.body;
 
-    if (!email || !name) {
+    if (!email || !name || !phone) {
       return res.status(400).json({
         success: false,
-        message: "Name and Email are required",
+        message: "Name, email, and phone are required",
       });
     }
 
-    // Validate email format
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({
         success: false,
@@ -410,34 +438,40 @@ const sendOtp = async (req, res) => {
       digits: true,
     });
 
-    otpStore.set(email, {
-      otp,
-      name,
-      expires: Date.now() + 10 * 60 * 1000, // 10 minutes
-    });
+    const user = await PopUser.findOneAndUpdate(
+      { email: email.toLowerCase().trim() },
+      {
+        user: name.trim(),
+        email: email.toLowerCase().trim(),
+        phone: phone.trim(),
+        otp,
+        expires: Date.now() + 10 * 60 * 1000,
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    );
 
     await transporter.sendMail({
       from: `"Your Blog" <${process.env.EMAIL_USER}>`,
-      to: email,
+      to: user.email,
       subject: "Your OTP for Comment Verification",
       html: `
-        <h2>Hello ${name},</h2>
+        <h2>Hello ${user.user},</h2>
         <p>Your OTP for commenting is: <strong>${otp}</strong></p>
         <p>This OTP will expire in 10 minutes.</p>
         <p>Thank you for engaging with our blog!</p>
       `,
     });
 
-    console.log(`✅ OTP sent to ${email} → ${otp}`);
+    console.log(`✅ OTP sent to ${user.email} → ${otp}`);
 
     res.status(200).json({
       success: true,
       message: "OTP sent successfully",
+      userId: user._id,
     });
   } catch (error) {
     console.error("❌ Send OTP Error:", error);
 
-    // Better error message for debugging
     res.status(500).json({
       success: false,
       message: "Failed to send OTP. Please check server logs.",
@@ -457,13 +491,13 @@ const verifyOtpAndComment = async (req, res) => {
         .json({ success: false, message: "All fields are required" });
     }
 
-    const stored = otpStore.get(email);
-    if (!stored || stored.expires < Date.now()) {
+    const user = await PopUser.findOne({ email: email.toLowerCase().trim() });
+    if (!user || !user.otp || !user.expires || user.expires < Date.now()) {
       return res
         .status(400)
         .json({ success: false, message: "OTP expired or invalid" });
     }
-    if (stored.otp !== otp) {
+    if (user.otp !== otp) {
       return res.status(400).json({ success: false, message: "Invalid OTP" });
     }
 
@@ -472,8 +506,7 @@ const verifyOtpAndComment = async (req, res) => {
       {
         $push: {
           comments: {
-            user: stored.name,
-            email: email,
+            user: user._id,
             comment: comment.trim(),
           },
         },
@@ -487,8 +520,10 @@ const verifyOtpAndComment = async (req, res) => {
         .json({ success: false, message: "Post not found" });
     }
 
-    // Clean up OTP
-    otpStore.delete(email);
+    user.comments.push({ postId: post._id, comment: comment.trim() });
+    user.otp = null;
+    user.expires = null;
+    await user.save();
 
     res.status(201).json({
       success: true,

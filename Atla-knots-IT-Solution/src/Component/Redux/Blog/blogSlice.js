@@ -1,5 +1,3 @@
-
-
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 // Async thunk to fetch categories
@@ -15,7 +13,7 @@ export const fetchCategories = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message || "Error fetching categories");
     }
-  }
+  },
 );
 
 // Async thunk to fetch all blog posts
@@ -31,7 +29,7 @@ export const fetchBlogPosts = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message || "Error fetching blog posts");
     }
-  }
+  },
 );
 
 // Async thunk to fetch SINGLE blog post by ID
@@ -47,7 +45,7 @@ export const fetchBlogPostById = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message || "Error loading blog post");
     }
-  }
+  },
 );
 
 // ====================== NEW THUNKS ======================
@@ -56,69 +54,85 @@ export const incrementPostView = createAsyncThunk(
   "blog/incrementView",
   async (postId, { rejectWithValue }) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/product/${postId}/view`, {
-        method: "PUT",
-      });
+      const res = await fetch(
+        `http://localhost:8000/api/product/${postId}/view`,
+        {
+          method: "PUT",
+        },
+      );
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
       return { postId, views: data.views };
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  }
+  },
 );
 
 export const togglePostLike = createAsyncThunk(
   "blog/toggleLike",
-  async (postId, { rejectWithValue }) => {
+  async (payload, { rejectWithValue }) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/product/${postId}/like`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-      });
+      const { postId, email } =
+        typeof payload === "string" ? { postId: payload } : payload;
+      const res = await fetch(
+        `http://localhost:8000/api/product/${postId}/like`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        },
+      );
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
       return { postId, likes: data.likes, liked: data.liked };
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  }
+  },
 );
 
 export const sendCommentOtp = createAsyncThunk(
   "blog/sendCommentOtp",
-  async ({ postId, name, email }, { rejectWithValue }) => {
+  async (payload, { rejectWithValue }) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/product/${postId}/send-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email }),
-      });
+      const { postId, name, email, phone } = payload;
+      const res = await fetch(
+        `http://localhost:8000/api/product/${postId}/send-otp`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, phone }),
+        },
+      );
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
       return data;
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  }
+  },
 );
 
 export const postCommentWithOtp = createAsyncThunk(
   "blog/postCommentWithOtp",
   async ({ postId, email, otp, comment }, { rejectWithValue }) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/product/${postId}/comment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp, comment }),
-      });
+      const res = await fetch(
+        `http://localhost:8000/api/product/${postId}/comment`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, otp, comment }),
+        },
+      );
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
       return { postId, comments: data.comments };
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  }
+  },
 );
 
 const blogSlice = createSlice({
