@@ -29,4 +29,5 @@ router.post("/technology/:id/send-otp", sendOtp);            // Send OTP
 // Old simple comment (optional - keep only if needed)
 router.post("/technology/:id/send-otp", sendOtp);
 router.post("/technology/:id/comment", verifyOtpAndComment);
+
 module.exports = router;

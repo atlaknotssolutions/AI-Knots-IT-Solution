@@ -222,7 +222,6 @@ const deletedContent = async (req, res) => {
   }
 };
 
-
 const getSingleContent = async (req, res) => {
   try {
     const { id } = req.params;
@@ -357,36 +356,105 @@ const incrementView = async (req, res) => {
 const addComment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { comment, userEmail } = req.body;
+    const { comment, userEmail, userId, email, otp } = req.body;
+    const resolvedEmail = userEmail || email;
 
-    if (!comment) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Comment is required" });
+    if (!comment || (!resolvedEmail && !userId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Comment and userEmail/email/userId are required",
+      });
     }
 
     let user = null;
-    if (userEmail) {
-      user = await PopUser.findOne({ email: userEmail.toLowerCase().trim() });
+    if (userId) {
+      user = await PopUser.findById(userId);
+    } else if (resolvedEmail) {
+      user = await PopUser.findOne({
+        email: resolvedEmail.toLowerCase().trim(),
+      });
     }
 
-    const post = await Product.findByIdAndUpdate(
-      id,
-      {
-        $push: {
-          comments: {
-            user: user ? user._id : null,
-            comment,
-          },
-        },
-      },
-      { new: true },
-    ).populate("category", "name");
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found. Send OTP first to register your email.",
+      });
+    }
+
+    if (otp) {
+      if (!user.otp || !user.expires || user.expires < Date.now()) {
+        return res.status(400).json({
+          success: false,
+          message: "OTP expired or invalid",
+        });
+      }
+      if (user.otp !== otp) {
+        return res.status(400).json({ success: false, message: "Invalid OTP" });
+      }
+      user.otp = null;
+      user.expires = null;
+      await user.save();
+    }
+
+    const post = await Product.findById(id);
+    if (!post) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
+    }
+
+    post.comments.push({
+      user: user._id,
+      comment: comment.trim(),
+    });
+
+    await post.save();
+
+    user.comments.push({ postId: post._id, comment: comment.trim() });
+    await user.save();
 
     res.status(201).json({
       success: true,
       message: "Comment added",
       comments: post.comments,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and OTP are required",
+      });
+    }
+
+    const user = await PopUser.findOne({ email: email.toLowerCase().trim() });
+    if (!user || !user.otp || !user.expires || user.expires < Date.now()) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP expired or invalid",
+      });
+    }
+
+    if (user.otp !== otp) {
+      return res.status(400).json({ success: false, message: "Invalid OTP" });
+    }
+
+    user.otp = null;
+    user.expires = null;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "OTP verified",
+      userId: user._id,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -606,5 +674,6 @@ module.exports = {
   toggleLike, // ← New
   addComment,
   sendOtp,
-  verifyOtpAndComment, // ← New
+  verifyOtp,
+  verifyOtpAndComment,
 };
