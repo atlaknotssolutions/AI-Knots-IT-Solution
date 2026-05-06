@@ -584,6 +584,7 @@ export default function About() {
       </section>
 
 
+
 <section className={`py-24 relative overflow-hidden ${isDark ? "bg-gradient-to-b from-black to-gray-900" : "bg-gradient-to-b from-gray-50 to-white"}`}>
   <div className="container mx-auto px-6 lg:px-8 relative z-10">
     <div className="text-center mb-16">
