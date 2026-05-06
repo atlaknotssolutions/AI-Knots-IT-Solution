@@ -3,11 +3,9 @@
 const imagekit = require("../../utils/imagekit.js");
 const Product = require("../../module/homemodule/homemodule");
 const Category = require("../../module/BlogModule/caetgorymodule.js");
+const nodemailer = require("nodemailer");
+const otpGenerator = require("otp-generator");
 
-
-// ============================
-// CREATE PRODUCT
-// ============================
 const createContent = async (req, res) => {
   try {
     const { name, description, category,author } = req.body;
@@ -265,17 +263,38 @@ const getSingleContent = async (req, res) => {
 };
 
 
+
+
+
+
+
+const otpStore = new Map();
+
+// Nodemailer Setup
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
 // ======================
 // INCREMENT VIEW
 // ======================
 const incrementView = async (req, res) => {
   try {
     const { id } = req.params;
+
     const updated = await Product.findByIdAndUpdate(
       id,
       { $inc: { views: 1 } },
       { new: true }
     ).populate("category", "name");
+
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "Post not found" });
+    }
 
     res.status(200).json({ success: true, views: updated.views });
   } catch (error) {
@@ -283,35 +302,6 @@ const incrementView = async (req, res) => {
   }
 };
 
-// ======================
-// LIKE / UNLIKE
-// ======================
-const toggleLike = async (req, res) => {
-  try {
-    const { id } = req.params;
-    // For now using simple count. You can improve with user ID later.
-    const post = await Product.findById(id);
-
-    if (!post) return res.status(404).json({ success: false, message: "Post not found" });
-
-    // Simple toggle (you can make it user-specific later)
-    const isLiked = false; // Placeholder
-    if (isLiked) {
-      post.likes = Math.max(0, post.likes - 1);
-    } else {
-      post.likes += 1;
-    }
-
-    await post.save();
-    res.status(200).json({ success: true, likes: post.likes });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-// ======================
-// ADD COMMENT
-// ======================
 const addComment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -340,23 +330,46 @@ const addComment = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+// ======================
+// LIKE / UNLIKE (Proper with likedBy)
+// ======================
+const toggleLike = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id; // If you have auth middleware
 
+    const post = await Product.findById(id);
+    if (!post) {
+      return res.status(404).json({ success: false, message: "Post not found" });
+    }
 
-const nodemailer = require("nodemailer");
-const otpGenerator = require("otp-generator");
+    const hasLiked = post.likedBy.includes(userId);
 
-// Store OTPs temporarily (In production use Redis)
-const otpStore = new Map(); // { email: { otp, expires } }
+    if (hasLiked) {
+      // Unlike
+      post.likedBy = post.likedBy.filter((uid) => uid.toString() !== userId);
+      post.likes = Math.max(0, post.likes - 1);
+    } else {
+      // Like
+      post.likedBy.push(userId);
+      post.likes += 1;
+    }
 
-// Nodemailer Setup (Use your Gmail / Brevo / Resend)
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+    await post.save();
 
+    res.status(200).json({
+      success: true,
+      likes: post.likes,
+      liked: !hasLiked,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ======================
+// SEND OTP FOR COMMENT
+// ======================
 // ======================
 // SEND OTP
 // ======================
@@ -365,18 +378,30 @@ const sendOtp = async (req, res) => {
     const { email, name } = req.body;
 
     if (!email || !name) {
-      return res.status(400).json({ success: false, message: "Name and Email are required" });
+      return res.status(400).json({ 
+        success: false, 
+        message: "Name and Email are required" 
+      });
     }
 
-    const otp = otpGenerator.generate(6, { 
-      upperCaseAlphabets: false, 
-      specialChars: false 
+    // Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Invalid email format" 
+      });
+    }
+
+    const otp = otpGenerator.generate(6, {
+      upperCaseAlphabets: false,
+      specialChars: false,
+      digits: true,
     });
 
     otpStore.set(email, {
       otp,
       name,
-      expires: Date.now() + 10 * 60 * 1000 // 10 minutes
+      expires: Date.now() + 10 * 60 * 1000, // 10 minutes
     });
 
     await transporter.sendMail({
@@ -387,38 +412,49 @@ const sendOtp = async (req, res) => {
         <h2>Hello ${name},</h2>
         <p>Your OTP for commenting is: <strong>${otp}</strong></p>
         <p>This OTP will expire in 10 minutes.</p>
+        <p>Thank you for engaging with our blog!</p>
       `
     });
 
-    res.status(200).json({ success: true, message: "OTP sent successfully" });
+    console.log(`✅ OTP sent to ${email} → ${otp}`);
+
+    res.status(200).json({ 
+      success: true, 
+      message: "OTP sent successfully" 
+    });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Failed to send OTP" });
+    console.error("❌ Send OTP Error:", error);
+    
+    // Better error message for debugging
+    res.status(500).json({ 
+      success: false, 
+      message: "Failed to send OTP. Please check server logs.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined
+    });
   }
 };
 
 // ======================
-// VERIFY OTP & POST COMMENT
+// VERIFY OTP & ADD COMMENT
 // ======================
 const verifyOtpAndComment = async (req, res) => {
   try {
-    const { id } = req.params;           // post id
+    const { id } = req.params;
     const { email, otp, comment } = req.body;
 
     if (!email || !otp || !comment) {
-      return res.status(400).json({ success: false, message: "All fields required" });
+      return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
     const stored = otpStore.get(email);
     if (!stored || stored.expires < Date.now()) {
       return res.status(400).json({ success: false, message: "OTP expired or invalid" });
     }
-
     if (stored.otp !== otp) {
       return res.status(400).json({ success: false, message: "Invalid OTP" });
     }
 
-    // OTP Verified → Save Comment
     const post = await Product.findByIdAndUpdate(
       id,
       {
@@ -426,14 +462,18 @@ const verifyOtpAndComment = async (req, res) => {
           comments: {
             user: stored.name,
             email: email,
-            comment: comment,
+            comment: comment.trim(),
           },
         },
       },
       { new: true }
-    );
+    ).populate("category", "name");
 
-    // Clear OTP after use
+    if (!post) {
+      return res.status(404).json({ success: false, message: "Post not found" });
+    }
+
+    // Clean up OTP
     otpStore.delete(email);
 
     res.status(201).json({

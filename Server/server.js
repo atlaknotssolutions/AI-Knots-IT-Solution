@@ -31,7 +31,7 @@ morgan.token("body", (req) => JSON.stringify(req.body));
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :body"),
 );
-// app.use(fileUpload({ useTempFiles: true, tempFileDir: "/tmp/" }));
+// app.use(fileUpload({ useTempFiles: true}));
 app.use(express.json()); // for JSON bodies
 app.use(express.urlencoded({ extended: true })); // for form-urlencoded bodies
 mongoose
@@ -41,11 +41,11 @@ mongoose
     console.error("❌ MongoDB Connection Error:", err);
     process.exit(1);
   });
-// app.use(
-//   fileUpload({
-//     useTempFiles: true,
-//   }),
-// );
+app.use(
+  fileUpload({
+    useTempFiles: true,
+  }),
+);
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cookieParser());
@@ -72,15 +72,9 @@ app.use("/query", queryRoutes);
 app.use("/portfolio", portfolioRoutes);
 app.use("/category/portfolio", portfoliocategoryRoutes);
 
-
 app.use("/jobapply", jobapplyRoutes);
 app.use("/category/jobapply", jobapplyCategoryRoutes);
 app.use("/jobapplication", jobapplicationRoutes);
-
-
-
-
-
 
 app.get("/", (req, res) => {
   res.send("🚀 Server is running successfully");
