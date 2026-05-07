@@ -17,7 +17,7 @@ import Gallery from "./Pages/gallery/Gallery";
 // import Poftfolio from './Pages/Portfolio/Poftfolio';
 import Portfolio from "./Pages/Portfolio/Portfolio";
 import PortfolioCategory from "./Pages/Portfolio/categoryPortfolio/PortfolioCategory";
-import CreateJob from "./Pages/createjob/createjob";
+import CreateJob from "./Pages/createjob/CreateJob";
 import EditJob from "./Pages/createjob/EditJob";
 import AdminJobs from "./Pages/createjob/AdminJob";
 import JobCategory from "./Pages/applyjobcategory/jobCategory";
