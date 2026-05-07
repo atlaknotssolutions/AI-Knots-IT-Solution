@@ -104,6 +104,106 @@ const getHomeData = async (req, res) => {
   }
 };
 
+const getAdminProducts = async (req, res) => {
+  try {
+    const { limit = 15, page = 1, search = "", category = "" } = req.query;
+
+    // Validate and sanitize query parameters
+    const limitNum = parseInt(limit, 10);
+    const pageNum = parseInt(page, 10);
+
+    if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid limit parameter. Must be a number between 1 and 100.",
+      });
+    }
+
+    if (isNaN(pageNum) || pageNum < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid page parameter. Must be a number greater than 0.",
+      });
+    }
+
+    let query = {};
+
+    // Search Filter
+    if (search && typeof search === "string" && search.trim()) {
+      const searchTerm = search.trim();
+      query.$or = [
+        { name: { $regex: searchTerm, $options: "i" } },
+        { title: { $regex: searchTerm, $options: "i" } },
+        { description: { $regex: searchTerm, $options: "i" } },
+      ];
+    }
+
+    // Category Filter
+    if (category && typeof category === "string" && category.trim()) {
+      const categoryId = category.trim();
+      // Validate ObjectId format
+      if (!/^[0-9a-fA-F]{24}$/.test(categoryId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid category ID format.",
+        });
+      }
+      query.category = categoryId;
+    }
+
+    const products = await Product.find(query)
+      .populate("category", "name slug")
+      .select(
+        "name title category author description images views likes content createdAt updatedAt comments",
+      )
+      .sort({ createdAt: -1 })
+      .limit(limitNum)
+      .skip((pageNum - 1) * limitNum)
+      .lean();
+
+    const total = await Product.countDocuments(query);
+
+    const data = products.map((p) => ({
+      _id: p._id, // Include _id for admin operations
+      name: p.name,
+      title: p.title,
+      category: p.category,
+      author: p.author,
+      description: p.description,
+      thumbnail: p.images && p.images.length > 0 ? p.images[0] : null,
+      imagesCount: p.images ? p.images.length : 0,
+      views: p.views || 0,
+      likes: p.likes || 0,
+      totalComments: p.comments ? p.comments.length : 0,
+      createdAt: p.createdAt,
+      updatedAt: p.updatedAt,
+      status: p.content && p.content.trim().length > 50 ? "Published" : "Draft",
+      readingTime: p.content
+        ? Math.ceil(p.content.split(/\s+/).length / 200) + " min"
+        : "N/A",
+    }));
+
+    return res.status(200).json({
+      success: true,
+      data: data,
+      pagination: {
+        total,
+        currentPage: pageNum,
+        totalPages: Math.ceil(total / limitNum),
+        limit: limitNum,
+      },
+      message: "Admin products data fetched successfully",
+    });
+  } catch (error) {
+    console.error("Error in getAdminProducts:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while fetching products",
+      error: error.message,
+    });
+  }
+};
+
 // ============================
 // UPDATE PRODUCT
 // ============================
@@ -676,4 +776,5 @@ module.exports = {
   sendOtp,
   verifyOtp,
   verifyOtpAndComment,
+  getAdminProducts,
 };
