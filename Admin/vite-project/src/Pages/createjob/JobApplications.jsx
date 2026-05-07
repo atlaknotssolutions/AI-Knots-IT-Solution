@@ -1,534 +1,5 @@
-// // // import React, { useEffect, useState } from "react";
-// // // import { useParams } from "react-router-dom";
 
-// // // const JobApplications = () => {
-// // //   const [applications, setApplications] = useState([]);
-// // //   const [loading, setLoading] = useState(true);
-// // //   const [error, setError] = useState(null);
-// // //   const [jobTitle, setJobTitle] = useState("");
 
-// // //   // Status options
-// // //   const statusOptions = [
-// // //     "Pending",
-// // //     "Reviewed",
-// // //     "Shortlisted",
-// // //     "Rejected",
-// // //     "Accepted",
-// // //   ];
-
-// // //   // Fetch applications for a specific job
-// // //   const fetchApplications = async (jobId) => {
-// // //     try {
-// // //       setLoading(true);
-// // //       setError(null);
-
-// // //       const res = await fetch(
-// // //         `http://localhost:8000/jobapplication/job/${jobId}`,
-// // //       );
-
-// // //       if (!res.ok) throw new Error("Failed to fetch applications");
-
-// // //       const data = await res.json();
-// // //       setApplications(data.data || []);
-// // //       setJobTitle(data.jobTitle || "Job Applications");
-// // //     } catch (err) {
-// // //       setError(err.message);
-// // //       console.error(err);
-// // //     } finally {
-// // //       setLoading(false);
-// // //     }
-// // //   };
-
-// // //   const fetchAllApplications = async () => {
-// // //     try {
-// // //       setLoading(true);
-// // //       setError(null);
-
-// // //       const res = await fetch("http://localhost:8000/jobapplication/");
-// // //       if (!res.ok) throw new Error("Failed to fetch applications");
-
-// // //       const data = await res.json();
-// // //       setApplications(data.data || []);
-// // //       setJobTitle("All Job Applications");
-// // //     } catch (err) {
-// // //       setError(err.message);
-// // //       console.error(err);
-// // //     } finally {
-// // //       setLoading(false);
-// // //     }
-// // //   };
-
-// // //   // Update application status
-// // //   const updateStatus = async (applicationId, newStatus) => {
-// // //     try {
-// // //       const res = await fetch(
-// // //         `http://localhost:8000/jobapplication/${applicationId}/status`,
-// // //         {
-// // //           method: "PUT",
-// // //           headers: { "Content-Type": "application/json" },
-// // //           body: JSON.stringify({ status: newStatus }),
-// // //         },
-// // //       );
-
-// // //       if (res.ok) {
-// // //         // Optimistically update UI
-// // //         setApplications((prev) =>
-// // //           prev.map((app) =>
-// // //             app._id === applicationId ? { ...app, status: newStatus } : app,
-// // //           ),
-// // //         );
-// // //       } else {
-// // //         alert("Failed to update status");
-// // //       }
-// // //     } catch (err) {
-// // //       console.error(err);
-// // //       alert("Something went wrong");
-// // //     }
-// // //   };
-
-// // //   const { jobId } = useParams();
-
-// // //   useEffect(() => {
-// // //     if (jobId) {
-// // //       fetchApplications(jobId);
-// // //     } else {
-// // //       fetchAllApplications();
-// // //     }
-// // //   }, [jobId]);
-
-// // //   return (
-// // //     <div className="min-h-screen bg-gray-50 p-6">
-// // //       <div className="max-w-7xl mx-auto">
-// // //         <h1 className="text-4xl font-bold mb-8 text-gray-900">
-// // //           Applications for <span className="text-red-600">{jobTitle}</span>
-// // //         </h1>
-
-// // //         {loading && (
-// // //           <p className="text-center py-10 text-xl text-gray-600">
-// // //             Loading applications...
-// // //           </p>
-// // //         )}
-
-// // //         {error && <p className="text-red-500 text-center py-10">{error}</p>}
-
-// // //         {!loading && applications.length === 0 && (
-// // //           <p className="text-center py-10 text-xl text-gray-600">
-// // //             No applications yet.
-// // //           </p>
-// // //         )}
-
-// // //         <div className="space-y-4">
-// // //           {applications.map((app) => (
-// // //             <div
-// // //               key={app._id}
-// // //               className="bg-white border border-gray-200 p-6 rounded-2xl flex flex-col md:flex-row md:items-center gap-6 hover:border-red-500 transition-all shadow-sm"
-// // //             >
-// // //               <div className="flex-1">
-// // //                 <h3 className="text-2xl font-semibold text-gray-900">
-// // //                   {app.name}
-// // //                 </h3>
-// // //                 <p className="text-gray-600 mt-1">
-// // //                   {app.email} • {app.phone}
-// // //                 </p>
-// // //                 {app.coverLetter && (
-// // //                   <p className="mt-4 text-sm text-gray-700 line-clamp-3">
-// // //                     {app.coverLetter}
-// // //                   </p>
-// // //                 )}
-// // //               </div>
-
-// // //               <div className="flex flex-col md:items-end gap-3">
-// // //                 <div className="flex items-center gap-3">
-// // //                   <span className="text-sm text-gray-500">Status:</span>
-// // //                   <select
-// // //                     value={app.status || "Pending"}
-// // //                     onChange={(e) => updateStatus(app._id, e.target.value)}
-// // //                     className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-red-600 cursor-pointer bg-white"
-// // //                   >
-// // //                     {statusOptions.map((status) => (
-// // //                       <option key={status} value={status}>
-// // //                         {status}
-// // //                       </option>
-// // //                     ))}
-// // //                   </select>
-// // //                 </div>
-
-// // //                 <div className="text-xs text-gray-500">
-// // //                   Applied: {new Date(app.createdAt).toLocaleDateString("en-IN")}
-// // //                 </div>
-// // //               </div>
-// // //             </div>
-// // //           ))}
-// // //         </div>
-// // //       </div>
-// // //     </div>
-// // //   );
-// // // };
-
-// // // export default JobApplications;
-
-
-// // import React, { useEffect, useState } from "react";
-// // import { useParams } from "react-router-dom";
-
-// // const JobApplications = () => {
-// //   const [applications, setApplications] = useState([]);
-// //   const [loading, setLoading] = useState(true);
-// //   const [error, setError] = useState(null);
-// //   const [jobTitle, setJobTitle] = useState("");
-
-// //   const statusOptions = ["Pending", "Reviewed", "Shortlisted", "Rejected", "Accepted"];
-
-// //   // Fetch applications for specific job
-// //   const fetchApplications = async (jobId) => {
-// //     try {
-// //       setLoading(true);
-// //       setError(null);
-
-// //       const res = await fetch(`http://localhost:8000/jobapplication/job/${jobId}`);
-
-// //       if (!res.ok) throw new Error("Failed to fetch applications");
-
-// //       const data = await res.json();
-      
-// //       setApplications(data.data || []);
-// //       setJobTitle(data.jobTitle || "Job Applications");
-// //     } catch (err) {
-// //       setError(err.message);
-// //       console.error(err);
-// //     } finally {
-// //       setLoading(false);
-// //     }
-// //   };
-
-// //   // Fetch all applications
-// //   const fetchAllApplications = async () => {
-// //     try {
-// //       setLoading(true);
-// //       setError(null);
-
-// //       const res = await fetch("http://localhost:8000/jobapplication/");
-// //       if (!res.ok) throw new Error("Failed to fetch applications");
-
-// //       const data = await res.json();
-// //       setApplications(data.data || []);
-// //       setJobTitle("All Job Applications");
-// //     } catch (err) {
-// //       setError(err.message);
-// //       console.error(err);
-// //     } finally {
-// //       setLoading(false);
-// //     }
-// //   };
-
-// //   // Update Status
-// //   const updateStatus = async (applicationId, newStatus) => {
-// //     try {
-// //       const res = await fetch(
-// //         `http://localhost:8000/jobapplication/${applicationId}/status`,
-// //         {
-// //           method: "PUT",
-// //           headers: { "Content-Type": "application/json" },
-// //           body: JSON.stringify({ status: newStatus }),
-// //         }
-// //       );
-
-// //       if (res.ok) {
-// //         setApplications((prev) =>
-// //           prev.map((app) =>
-// //             app._id === applicationId ? { ...app, status: newStatus } : app
-// //           )
-// //         );
-// //       } else {
-// //         alert("Failed to update status");
-// //       }
-// //     } catch (err) {
-// //       console.error(err);
-// //       alert("Something went wrong");
-// //     }
-// //   };
-
-// //   const { jobId } = useParams();
-
-// //   useEffect(() => {
-// //     if (jobId) {
-// //       fetchApplications(jobId);
-// //     } else {
-// //       fetchAllApplications();
-// //     }
-// //   }, [jobId]);
-
-// //   // Download Resume Function
-// //   const handleDownloadResume = (url) => {
-// //     window.open(url, "_blank");
-// //   };
-
-// //   return (
-// //     <div className="min-h-screen bg-gray-50 p-6">
-// //       <div className="max-w-7xl mx-auto">
-// //         <h1 className="text-4xl font-bold mb-8 text-gray-900">
-// //           Applications for <span className="text-red-600">{jobTitle}</span>
-// //         </h1>
-
-// //         {loading && (
-// //           <div className="text-center py-20">
-// //             <p className="text-xl text-gray-600">Loading applications...</p>
-// //           </div>
-// //         )}
-
-// //         {error && (
-// //           <div className="text-center py-20 text-red-500 text-xl">
-// //             ⚠️ {error}
-// //           </div>
-// //         )}
-
-// //         {!loading && applications.length === 0 && !error && (
-// //           <div className="text-center py-20 text-gray-600 text-xl">
-// //             No applications received yet.
-// //           </div>
-// //         )}
-
-// //         <div className="space-y-6">
-// //           {applications.map((app) => (
-// //             <div
-// //               key={app._id}
-// //               className="bg-white border border-gray-200 p-6 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col lg:flex-row lg:items-center gap-6"
-// //             >
-// //               {/* Candidate Info */}
-// //               <div className="flex-1">
-// //                 <h3 className="text-2xl font-semibold text-gray-900">
-// //                   {app.name}
-// //                 </h3>
-// //                 <p className="text-gray-600 mt-1">
-// //                   {app.email} • {app.phone}
-// //                 </p>
-// //                 <p className="text-xs text-gray-500 mt-3">
-// //                   Applied: {new Date(app.appliedAt || app.createdAt).toLocaleDateString("en-IN", {
-// //                     day: "numeric",
-// //                     month: "short",
-// //                     year: "numeric",
-// //                     hour: "2-digit",
-// //                     minute: "2-digit",
-// //                   })}
-// //                 </p>
-// //               </div>
-
-// //               {/* Resume & Status */}
-// //               <div className="flex flex-col items-start lg:items-end gap-4">
-// //                 {/* Resume Button */}
-// //                 {app.resumeUrl && (
-// //                   <button
-// //                     onClick={() => handleDownloadResume(app.resumeUrl)}
-// //                     className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl transition-all text-sm font-medium"
-// //                   >
-// //                     📄 Download Resume
-// //                   </button>
-// //                 )}
-
-// //                 {/* Status Dropdown */}
-// //                 <div className="flex items-center gap-3">
-// //                   <span className="text-sm text-gray-500 whitespace-nowrap">Status:</span>
-// //                   <select
-// //                     value={app.status || "Pending"}
-// //                     onChange={(e) => updateStatus(app._id, e.target.value)}
-// //                     className="px-5 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:border-red-600 bg-white cursor-pointer font-medium"
-// //                   >
-// //                     {statusOptions.map((status) => (
-// //                       <option key={status} value={status}>
-// //                         {status}
-// //                       </option>
-// //                     ))}
-// //                   </select>
-// //                 </div>
-// //               </div>
-// //             </div>
-// //           ))}
-// //         </div>
-// //       </div>
-// //     </div>
-// //   );
-// // };
-
-// // export default JobApplications;
-
-// import React, { useEffect, useState } from "react";
-// import { useParams } from "react-router-dom";
-
-// const JobApplications = () => {
-//   const [applications, setApplications] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-//   const [jobTitle, setJobTitle] = useState("");
-
-//   const statusOptions = ["Pending", "Reviewed", "Shortlisted", "Rejected", "Accepted"];
-
-//   // Fetch Applications
-//   const fetchApplications = async (jobId) => {
-//     try {
-//       setLoading(true);
-//       setError(null);
-
-//       const res = await fetch(`http://localhost:8000/jobapplication/job/${jobId}`);
-//       if (!res.ok) throw new Error("Failed to fetch applications");
-
-//       const data = await res.json();
-//       setApplications(data.data || []);
-//       setJobTitle(data.jobTitle || "Job Applications");
-//     } catch (err) {
-//       setError(err.message);
-//       console.error(err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const fetchAllApplications = async () => {
-//     try {
-//       setLoading(true);
-//       setError(null);
-
-//       const res = await fetch("http://localhost:8000/jobapplication/");
-//       if (!res.ok) throw new Error("Failed to fetch applications");
-
-//       const data = await res.json();
-//       setApplications(data.data || []);
-//       setJobTitle("All Job Applications");
-//     } catch (err) {
-//       setError(err.message);
-//       console.error(err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const { jobId } = useParams();
-
-//   useEffect(() => {
-//     if (jobId) {
-//       fetchApplications(jobId);
-//     } else {
-//       fetchAllApplications();
-//     }
-//   }, [jobId]);
-
-//   // ==================== FORCE DOWNLOAD RESUME ====================
-//   const handleDownloadResume = async (url, applicantName) => {
-//     try {
-//       const response = await fetch(url);
-//       if (!response.ok) throw new Error("Download failed");
-
-//       const blob = await response.blob();
-//       const link = document.createElement("a");
-      
-//       // Beautiful filename: Aditya_Jain_Resume_05052026.pdf
-//       const fileName = `${applicantName.replace(/\s+/g, "_")}_Resume_${new Date().toISOString().slice(0,10)}.pdf`;
-
-//       link.href = URL.createObjectURL(blob);
-//       link.download = fileName;
-//       document.body.appendChild(link);
-//       link.click();
-//       document.body.removeChild(link);
-
-//       URL.revokeObjectURL(link.href); // Clean up
-//     } catch (err) {
-//       console.error(err);
-//       alert("Unable to download resume. Please try again or open link manually.");
-//       // Fallback
-//       window.open(url, "_blank");
-//     }
-//   };
-
-//   // Update Status
-//   const updateStatus = async (applicationId, newStatus) => {
-//     try {
-//       const res = await fetch(
-//         `http://localhost:8000/jobapplication/${applicationId}/status`,
-//         {
-//           method: "PUT",
-//           headers: { "Content-Type": "application/json" },
-//           body: JSON.stringify({ status: newStatus }),
-//         }
-//       );
-
-//       if (res.ok) {
-//         setApplications((prev) =>
-//           prev.map((app) =>
-//             app._id === applicationId ? { ...app, status: newStatus } : app
-//           )
-//         );
-//       } else {
-//         alert("Failed to update status");
-//       }
-//     } catch (err) {
-//       console.error(err);
-//       alert("Something went wrong");
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-gray-50 p-6">
-//       <div className="max-w-7xl mx-auto">
-//         <h1 className="text-4xl font-bold mb-8 text-gray-900">
-//           Applications for <span className="text-red-600">{jobTitle}</span>
-//         </h1>
-
-//         {loading && <p className="text-center py-20 text-xl">Loading applications...</p>}
-//         {error && <p className="text-red-500 text-center py-20">{error}</p>}
-
-//         {!loading && applications.length === 0 && (
-//           <p className="text-center py-20 text-xl text-gray-600">No applications yet.</p>
-//         )}
-
-//         <div className="space-y-6">
-//           {applications.map((app) => (
-//             <div
-//               key={app._id}
-//               className="bg-white border border-gray-200 p-6 rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center gap-6"
-//             >
-//               <div className="flex-1">
-//                 <h3 className="text-2xl font-semibold text-gray-900">{app.name}</h3>
-//                 <p className="text-gray-600 mt-1">{app.email} • {app.phone}</p>
-//                 <p className="text-xs text-gray-500 mt-3">
-//                   Applied: {new Date(app.appliedAt || app.createdAt).toLocaleDateString("en-IN", {
-//                     day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
-//                   })}
-//                 </p>
-//               </div>
-
-//               <div className="flex flex-col items-start lg:items-end gap-4">
-//                 {/* Resume Download Button */}
-//                 {app.resumeUrl && (
-//                   <button
-//                     onClick={() => handleDownloadResume(app.resumeUrl, app.name)}
-//                     className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-2xl transition-all font-medium shadow-sm hover:shadow-md"
-//                   >
-//                     📥 Download Resume
-//                   </button>
-//                 )}
-
-//                 {/* Status */}
-//                 <div className="flex items-center gap-3">
-//                   <span className="text-sm text-gray-500">Status:</span>
-//                   <select
-//                     value={app.status || "Pending"}
-//                     onChange={(e) => updateStatus(app._id, e.target.value)}
-//                     className="px-5 py-3 rounded-2xl border border-gray-300 focus:border-red-600 bg-white cursor-pointer"
-//                   >
-//                     {statusOptions.map((status) => (
-//                       <option key={status} value={status}>{status}</option>
-//                     ))}
-//                   </select>
-//                 </div>
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default JobApplications;
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -545,10 +16,10 @@ const JobApplications = () => {
     try {
       setLoading(true);
       const res = await fetch(`http://localhost:8000/jobapplication/job/${jobId}`);
-      if (!res.ok) throw new Error("Failed to fetch");
+      if (!res.ok) throw new Error("Failed to fetch applications");
       const data = await res.json();
       setApplications(data.data || []);
-      setJobTitle(data.jobTitle);
+      setJobTitle(data.jobTitle || "Job Applications");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -560,6 +31,7 @@ const JobApplications = () => {
     try {
       setLoading(true);
       const res = await fetch("http://localhost:8000/jobapplication/");
+      if (!res.ok) throw new Error("Failed to fetch applications");
       const data = await res.json();
       setApplications(data.data || []);
       setJobTitle("All Job Applications");
@@ -573,31 +45,59 @@ const JobApplications = () => {
   const { jobId } = useParams();
 
   useEffect(() => {
-    if (jobId) fetchApplications(jobId);
-    else fetchAllApplications();
+    if (jobId) {
+      fetchApplications(jobId);
+    } else {
+      fetchAllApplications();
+    }
   }, [jobId]);
 
-  // ==================== BEST RESUME DOWNLOAD ====================
+  // ==================== IMPROVED CLOUDINARY RESUME DOWNLOAD ====================
   const handleDownloadResume = async (url, name) => {
     try {
-      const response = await fetch(url, { mode: 'cors' });
-      if (!response.ok) throw new Error("Failed to fetch file");
+      let downloadUrl = url;
+
+      // Cloudinary optimization - force download
+      if (url.includes("cloudinary.com")) {
+        const separator = url.includes("?") ? "&" : "?";
+        downloadUrl = `${url}${separator}fl_attachment=true`;
+      }
+
+      const response = await fetch(downloadUrl, {
+        method: "GET",
+        mode: "cors",
+      });
+
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
       const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
+      const objectUrl = window.URL.createObjectURL(blob);
 
       const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.download = `${name.replace(/\s+/g, "_")}_Resume_${new Date().toISOString().slice(0,10)}.pdf`;
+      link.href = objectUrl;
       
+      const cleanName = name.replace(/[^a-zA-Z0-9\s-]/g, "").trim();
+      const fileName = `${cleanName}_Resume_${new Date().toISOString().slice(0, 10)}.pdf`;
+      
+      link.download = fileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(downloadUrl);
+
+      // Cleanup memory
+      setTimeout(() => window.URL.revokeObjectURL(objectUrl), 1500);
     } catch (err) {
-      console.error(err);
-      alert("Direct download failed. Opening in new tab...");
-      window.open(url, "_blank");
+      console.error("Download Error:", err);
+      
+      // Fallback: Open in new tab with attachment flag
+      let fallbackUrl = url;
+      if (url.includes("cloudinary.com")) {
+        const separator = url.includes("?") ? "&" : "?";
+        fallbackUrl = `${url}${separator}fl_attachment=true`;
+      }
+      
+      window.open(fallbackUrl, "_blank");
+      alert("Direct download failed. Opening resume in new tab.");
     }
   };
 
@@ -610,11 +110,16 @@ const JobApplications = () => {
       });
 
       if (res.ok) {
-        setApplications(prev =>
-          prev.map(app => app._id === id ? { ...app, status: newStatus } : app)
+        setApplications((prev) =>
+          prev.map((app) =>
+            app._id === id ? { ...app, status: newStatus } : app
+          )
         );
+      } else {
+        alert("Failed to update status");
       }
     } catch (err) {
+      console.error(err);
       alert("Status update failed");
     }
   };
@@ -626,16 +131,34 @@ const JobApplications = () => {
           Applications for <span className="text-red-600">{jobTitle}</span>
         </h1>
 
-        {loading && <p className="text-center py-20 text-xl">Loading...</p>}
-        {error && <p className="text-red-500 text-center py-20">{error}</p>}
+        {loading && (
+          <p className="text-center py-20 text-xl text-gray-600">Loading applications...</p>
+        )}
+
+        {error && (
+          <p className="text-red-500 text-center py-20 text-lg">{error}</p>
+        )}
+
+        {!loading && !error && applications.length === 0 && (
+          <p className="text-center py-20 text-gray-500 text-xl">
+            No applications found.
+          </p>
+        )}
 
         <div className="space-y-6">
           {applications.map((app) => (
-            <div key={app._id} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex flex-col lg:flex-row gap-6 items-start lg:items-center">
-              <div className="flex-1">
-                <h3 className="text-2xl font-semibold">{app.name}</h3>
-                <p className="text-gray-600">{app.email} • {app.phone}</p>
-                <p className="text-xs text-gray-500 mt-2">
+            <div
+              key={app._id}
+              className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex flex-col lg:flex-row gap-6 items-start lg:items-center hover:shadow-md transition-shadow"
+            >
+              <div className="flex-1 min-w-0">
+                <h3 className="text-2xl font-semibold text-gray-900 truncate">
+                  {app.name}
+                </h3>
+                <p className="text-gray-600 mt-1">
+                  {app.email} • {app.phone}
+                </p>
+                <p className="text-xs text-gray-500 mt-3">
                   Applied: {new Date(app.appliedAt || app.createdAt).toLocaleDateString("en-IN")}
                 </p>
               </div>
@@ -644,7 +167,7 @@ const JobApplications = () => {
                 {app.resumeUrl && (
                   <button
                     onClick={() => handleDownloadResume(app.resumeUrl, app.name)}
-                    className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-medium transition-all"
+                    className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-medium transition-all active:scale-95"
                   >
                     📥 Download Resume
                   </button>
@@ -653,10 +176,12 @@ const JobApplications = () => {
                 <select
                   value={app.status}
                   onChange={(e) => updateStatus(app._id, e.target.value)}
-                  className="px-5 py-3 rounded-2xl border border-gray-300 focus:border-red-600 cursor-pointer"
+                  className="px-5 py-3 rounded-2xl border border-gray-300 focus:border-red-600 focus:ring-1 focus:ring-red-600 cursor-pointer text-sm font-medium"
                 >
-                  {statusOptions.map(s => (
-                    <option key={s} value={s}>{s}</option>
+                  {statusOptions.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
                   ))}
                 </select>
               </div>

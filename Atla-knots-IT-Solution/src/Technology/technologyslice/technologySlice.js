@@ -2,7 +2,7 @@
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-// ====================== EXISTING THUNKS ======================
+// ====================== THUNKS ======================
 
 // Fetch categories
 export const fetchCategories = createAsyncThunk(
@@ -16,74 +16,97 @@ export const fetchCategories = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message || "Failed to load categories");
     }
-  },
+  }
 );
 
-// Fetch products
+// Fetch products (list)
 export const fetchProducts = createAsyncThunk(
   "technology/fetchProducts",
   async (categoryId, { rejectWithValue }) => {
     try {
       let url = "http://localhost:8000/api/technology/product";
-      if (categoryId) {
-        url += `?categoryId=${categoryId}`;
-      }
+      if (categoryId) url += `?categoryId=${categoryId}`;
 
       const res = await fetch(url);
       if (!res.ok) throw new Error("Failed to fetch products");
-      const data = await res.json();
 
+      const data = await res.json();
       let items = data.data || [];
       if (!Array.isArray(items)) items = [];
 
-      const formattedData = items.map((item, index) => ({
+      return items.map((item, index) => ({
         id: item._id || `item-${index + 1}`,
-        _id: item._id, // Keep original ID for engagement
+        _id: item._id,
         title: item.title || item.name || "Untitled",
         description: item.description || "No description available",
-        date:
-          item.updatedAt || item.createdAt
-            ? new Date(item.updatedAt || item.createdAt).toLocaleDateString(
-                "en-US",
-                {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                },
-              )
-            : "Recently",
+        date: item.updatedAt || item.createdAt
+          ? new Date(item.updatedAt || item.createdAt).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
+          : "Recently",
         category: item.category?.name || "General",
         categoryId: item.category?._id,
-        link: item.link || item.url || "#",
-        image: item.images?.length > 0 ? item.images[0] : null,
+        image: item.images?.[0] || null,
         images: item.images || [],
-        readTime: "5 min read",
         views: item.views || 0,
         likes: item.likes || 0,
         comments: item.comments || [],
         author: item.author || "Tech Team",
         trending: Math.random() > 0.7,
       }));
-
-      return formattedData;
     } catch (err) {
       return rejectWithValue(err.message || "Failed to load products");
     }
-  },
+  }
 );
 
-// ====================== ENGAGEMENT THUNKS ======================
+// Fetch Single Post (Important for Detail Page)
+export const fetchSinglePost = createAsyncThunk(
+  "technology/fetchSinglePost",
+  async (postId, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/technology/product/technology/${postId}`);
+      if (!res.ok) throw new Error("Failed to fetch post");
 
-// Increment View
+      const data = await res.json();
+      const item = data.data || data;
+
+      return {
+        id: item._id,
+        _id: item._id,
+        title: item.title || item.name || "Untitled",
+        description: item.description || "",
+        date: item.updatedAt
+          ? new Date(item.updatedAt).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
+          : "Recently",
+        category: item.category?.name || "General",
+        image: item.images?.[0] || null,
+        images: item.images || [],
+        views: item.views || 0,
+        likes: item.likes || 0,
+        comments: item.comments || [],
+        author: item.author || "Tech Team",
+      };
+    } catch (err) {
+      return rejectWithValue(err.message || "Failed to fetch post details");
+    }
+  }
+);
+
+// Engagement Thunks
 export const incrementPostView = createAsyncThunk(
   "technology/incrementView",
   async (postId, { rejectWithValue }) => {
     try {
       const res = await fetch(
         `http://localhost:8000/api/technology/product/technology/${postId}/view`,
-        {
-          method: "PUT",
-        },
+        { method: "PUT" }
       );
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
@@ -91,23 +114,21 @@ export const incrementPostView = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  },
+  }
 );
 
-// Toggle Like
 export const togglePostLike = createAsyncThunk(
   "technology/toggleLike",
   async (payload, { rejectWithValue }) => {
     try {
-      const { postId, email } =
-        typeof payload === "string" ? { postId: payload } : payload;
+      const { postId, email } = typeof payload === "string" ? { postId: payload } : payload;
       const res = await fetch(
         `http://localhost:8000/api/technology/product/technology/${postId}/like`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
-        },
+        }
       );
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
@@ -115,10 +136,9 @@ export const togglePostLike = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  },
+  }
 );
 
-// Send OTP
 export const sendCommentOtp = createAsyncThunk(
   "technology/sendCommentOtp",
   async (payload, { rejectWithValue }) => {
@@ -130,7 +150,7 @@ export const sendCommentOtp = createAsyncThunk(
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, email, phone }),
-        },
+        }
       );
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
@@ -138,10 +158,9 @@ export const sendCommentOtp = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  },
+  }
 );
 
-// Post Comment with OTP
 export const postCommentWithOtp = createAsyncThunk(
   "technology/postCommentWithOtp",
   async ({ postId, email, otp, comment }, { rejectWithValue }) => {
@@ -152,7 +171,7 @@ export const postCommentWithOtp = createAsyncThunk(
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, otp, comment }),
-        },
+        }
       );
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
@@ -160,9 +179,10 @@ export const postCommentWithOtp = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  },
+  }
 );
 
+// ====================== SLICE ======================
 const technologySlice = createSlice({
   name: "technology",
   initialState: {
@@ -171,10 +191,6 @@ const technologySlice = createSlice({
     newsItems: [],
     loading: false,
     error: null,
-
-    // Engagement states
-    likeStatus: "idle",
-    commentStatus: "idle",
   },
   reducers: {
     setSelectedCategory(state, action) {
@@ -185,7 +201,7 @@ const technologySlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Fetch Categories
+    // Categories
     builder
       .addCase(fetchCategories.pending, (state) => {
         state.error = null;
@@ -195,10 +211,9 @@ const technologySlice = createSlice({
       })
       .addCase(fetchCategories.rejected, (state, action) => {
         state.error = action.payload;
-      });
+      })
 
-    // Fetch Products
-    builder
+      // Products List
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -212,28 +227,44 @@ const technologySlice = createSlice({
         state.error = action.payload;
       })
 
-      // ====================== ENGAGEMENT REDUCERS ======================
+      // Single Post
+      .addCase(fetchSinglePost.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchSinglePost.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.newsItems.findIndex(
+          (item) => item._id === action.payload._id
+        );
+
+        if (index !== -1) {
+          state.newsItems[index] = action.payload;
+        } else {
+          state.newsItems.unshift(action.payload); // Add if not exists
+        }
+      })
+      .addCase(fetchSinglePost.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Engagement Cases
       .addCase(incrementPostView.fulfilled, (state, action) => {
         const { postId, views } = action.payload;
-        const item = state.newsItems.find(
-          (i) => i._id === postId || i.id === postId,
-        );
+        const item = state.newsItems.find((i) => i._id === postId || i.id === postId);
         if (item) item.views = views;
       })
 
       .addCase(togglePostLike.fulfilled, (state, action) => {
         const { postId, likes } = action.payload;
-        const item = state.newsItems.find(
-          (i) => i._id === postId || i.id === postId,
-        );
+        const item = state.newsItems.find((i) => i._id === postId || i.id === postId);
         if (item) item.likes = likes;
       })
 
       .addCase(postCommentWithOtp.fulfilled, (state, action) => {
         const { postId, comments } = action.payload;
-        const item = state.newsItems.find(
-          (i) => i._id === postId || i.id === postId,
-        );
+        const item = state.newsItems.find((i) => i._id === postId || i.id === postId);
         if (item) item.comments = comments;
       });
   },

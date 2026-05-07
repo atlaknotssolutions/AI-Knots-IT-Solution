@@ -31,9 +31,14 @@ morgan.token("body", (req) => JSON.stringify(req.body));
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :body"),
 );
-// app.use(fileUpload({ useTempFiles: true}));
-app.use(express.json()); // for JSON bodies
-app.use(express.urlencoded({ extended: true })); // for form-urlencoded bodies
+app.use(
+  fileUpload({
+    createParentPath: true,
+    limits: { fileSize: 10 * 1024 * 1024 },
+    abortOnLimit: true,
+  }),
+);
+
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected Successfully"))
@@ -41,7 +46,6 @@ mongoose
     console.error("❌ MongoDB Connection Error:", err);
     process.exit(1);
   });
-app.use(fileUpload());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cookieParser());

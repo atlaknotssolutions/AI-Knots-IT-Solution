@@ -22,6 +22,7 @@ import EditJob from "./Pages/createjob/EditJob";
 import AdminJobs from "./Pages/createjob/AdminJob";
 import JobCategory from "./Pages/applyjobcategory/jobCategory";
 import JobApplications from "./Pages/createjob/JobApplications";
+import ProductAdmin from "./Pages/technology/Product/Productadmin";
 function App() {
   return (
     <BrowserRouter>
@@ -58,6 +59,7 @@ function App() {
               path="/admin/jobs/applications/:jobId"
               element={<JobApplications />}
             />
+            <Route path="/adminproducts" element={<ProductAdmin />} />
           </Route>
         </Route>
         <Route path="*" element={<Login />} />
