@@ -6,7 +6,9 @@ export const fetchTechNews = createAsyncThunk(
   "techNews/fetchTechNews",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get("http://localhost:8000/tech");
+      const response = await axios.get(
+        "https://ai-knots-it-solution.onrender.com/tech",
+      );
       let items = response.data?.data || [];
 
       if (!Array.isArray(items)) {

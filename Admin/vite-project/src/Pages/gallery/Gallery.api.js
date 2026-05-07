@@ -1,6 +1,6 @@
 // import axios from "axios";
 
-// const API_URL = "http://localhost:8000/api/gallery";
+// const API_URL = "https://ai-knots-it-solution.onrender.com/api/gallery";
 
 // export const createProductApi = (formData) => {
 //   return axios.post(API_URL, formData, {
@@ -13,7 +13,7 @@
 // // src/api/Gallery.api.js
 // import axios from "axios";
 
-// const API_BASE_URL = "http://localhost:8000/api/gallery";
+// const API_BASE_URL = "https://ai-knots-it-solution.onrender.com/api/gallery";
 
 // // For development - you can later move this to .env
 // // const API_BASE_URL = import.meta.env.VITE_API_URL + "/api/gallery";
@@ -45,7 +45,7 @@
 // src/api/Gallery.api.js
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:8000/api/gallery";
+const API_BASE_URL = "https://ai-knots-it-solution.onrender.com/api/gallery";
 // Later → const API_BASE_URL = import.meta.env.VITE_API_URL + "/api/gallery";
 
 export const createGalleryItem = (formData) => {

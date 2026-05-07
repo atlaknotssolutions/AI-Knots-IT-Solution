@@ -2,7 +2,7 @@
 import axios from "axios";
 
 // Base URL (change this to your production URL later)
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "https://ai-knots-it-solution.onrender.com";
 
 // Optional: Create an axios instance with baseURL (recommended)
 const api = axios.create({
@@ -18,18 +18,17 @@ export const getAdminProductsApi = (params = {}) => {
 
 // Get comments for a specific product (Admin)
 export const getAdminProductCommentsApi = (productId) => {
-  return api.get(`/api/technology/product/technology/${productId}/admin-comments`);
+  return api.get(
+    `/api/technology/product/technology/${productId}/admin-comments`,
+  );
 };
 
 // Delete a single comment (Admin)
 export const deleteAdminProductCommentApi = (productId, commentId) => {
   return api.delete(
-    `/api/technology/product/technology/${productId}/admin-comment/${commentId}`
+    `/api/technology/product/technology/${productId}/admin-comment/${commentId}`,
   );
 };
-
-
-
 
 export const createTechApi = (data) =>
   api.post("/api/technology/product/create", data);

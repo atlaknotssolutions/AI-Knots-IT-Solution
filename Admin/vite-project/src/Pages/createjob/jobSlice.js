@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "https://ai-knots-it-solution.onrender.com";
 const API_URL = `${API_BASE_URL}/jobapply`;
 
 export const createJob = createAsyncThunk(

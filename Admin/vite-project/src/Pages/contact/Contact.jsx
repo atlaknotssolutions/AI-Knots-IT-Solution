@@ -120,7 +120,9 @@ const Contact = () => {
       setLoading(true);
       setError(null);
 
-      const response = await axios.get("http://localhost:8000/api/contact");
+      const response = await axios.get(
+        "https://ai-knots-it-solution.onrender.com/api/contact",
+      );
 
       const result = response.data;
       // Assuming the response is { data: [...] } or just [...]
@@ -144,7 +146,9 @@ const Contact = () => {
     }
 
     try {
-      await axios.delete(`http://localhost:8000/api/contact/${id}`);
+      await axios.delete(
+        `https://ai-knots-it-solution.onrender.com/api/contact/${id}`,
+      );
 
       // Remove from UI
       setData((prev) => prev.filter((item) => item._id !== id));

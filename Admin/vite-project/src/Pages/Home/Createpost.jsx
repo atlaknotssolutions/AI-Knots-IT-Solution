@@ -15,7 +15,7 @@
 //     const fetchCategories = async () => {
 //       try {
 //         setFetchingCategories(true);
-//         const response = await fetch("http://localhost:8000/api/blogcategory");
+//         const response = await fetch("https://ai-knots-it-solution.onrender.com/api/blogcategory");
 
 //         if (!response.ok) {
 //           throw new Error("Failed to load categories");
@@ -220,7 +220,7 @@
 //     const fetchCategories = async () => {
 //       try {
 //         setFetchingCategories(true);
-//         const response = await fetch("http://localhost:8000/api/blogcategory");
+//         const response = await fetch("https://ai-knots-it-solution.onrender.com/api/blogcategory");
 
 //         if (!response.ok) {
 //           throw new Error("Failed to load categories");
@@ -470,7 +470,9 @@ const CreateProduct = () => {
     const fetchCategories = async () => {
       try {
         setFetchingCategories(true);
-        const response = await fetch("http://localhost:8000/api/blogcategory");
+        const response = await fetch(
+          "https://ai-knots-it-solution.onrender.com/api/blogcategory",
+        );
 
         if (!response.ok) {
           throw new Error("Failed to load categories");

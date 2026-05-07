@@ -5,7 +5,9 @@ export const fetchCategories = createAsyncThunk(
   "blog/fetchCategories",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await fetch("http://localhost:8000/api/blogcategory");
+      const res = await fetch(
+        "https://ai-knots-it-solution.onrender.com/api/blogcategory",
+      );
       if (!res.ok) throw new Error("Failed to fetch categories");
       const data = await res.json();
       if (!data.success) throw new Error(data.message || "Failed");
@@ -21,7 +23,9 @@ export const fetchBlogPosts = createAsyncThunk(
   "blog/fetchBlogPosts",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await fetch("http://localhost:8000/api/product");
+      const res = await fetch(
+        "https://ai-knots-it-solution.onrender.com/api/product",
+      );
       if (!res.ok) throw new Error("Failed to fetch posts");
       const data = await res.json();
       if (!data.success) throw new Error(data.message || "Failed");
@@ -37,7 +41,9 @@ export const fetchBlogPostById = createAsyncThunk(
   "blog/fetchBlogPostById",
   async (postId, { rejectWithValue }) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/product/${postId}`);
+      const res = await fetch(
+        `https://ai-knots-it-solution.onrender.com/api/product/${postId}`,
+      );
       if (!res.ok) throw new Error("Post not found");
       const data = await res.json();
       if (!data.success) throw new Error(data.message || "Failed to load post");
@@ -55,7 +61,7 @@ export const incrementPostView = createAsyncThunk(
   async (postId, { rejectWithValue }) => {
     try {
       const res = await fetch(
-        `http://localhost:8000/api/product/${postId}/view`,
+        `https://ai-knots-it-solution.onrender.com/api/product/${postId}/view`,
         {
           method: "PUT",
         },
@@ -76,7 +82,7 @@ export const togglePostLike = createAsyncThunk(
       const { postId, email } =
         typeof payload === "string" ? { postId: payload } : payload;
       const res = await fetch(
-        `http://localhost:8000/api/product/${postId}/like`,
+        `https://ai-knots-it-solution.onrender.com/api/product/${postId}/like`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -98,7 +104,7 @@ export const sendCommentOtp = createAsyncThunk(
     try {
       const { postId, name, email, phone } = payload;
       const res = await fetch(
-        `http://localhost:8000/api/product/${postId}/send-otp`,
+        `https://ai-knots-it-solution.onrender.com/api/product/${postId}/send-otp`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -119,7 +125,7 @@ export const verifyCommentOtp = createAsyncThunk(
   async ({ postId, email, otp }, { rejectWithValue }) => {
     try {
       const res = await fetch(
-        `http://localhost:8000/api/product/${postId}/verify-otp`,
+        `https://ai-knots-it-solution.onrender.com/api/product/${postId}/verify-otp`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -141,7 +147,7 @@ export const postComment = createAsyncThunk(
   async ({ postId, email, comment }, { rejectWithValue }) => {
     try {
       const res = await fetch(
-        `http://localhost:8000/api/product/${postId}/comment`,
+        `https://ai-knots-it-solution.onrender.com/api/product/${postId}/comment`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -1,5 +1,3 @@
-
-
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 // ====================== THUNKS ======================
@@ -9,14 +7,16 @@ export const fetchCategories = createAsyncThunk(
   "technology/fetchCategories",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await fetch("http://localhost:8000/api/technology/category");
+      const res = await fetch(
+        "https://ai-knots-it-solution.onrender.com/api/technology/category",
+      );
       if (!res.ok) throw new Error("Failed to fetch categories");
       const data = await res.json();
       return Array.isArray(data.data) ? data.data : [];
     } catch (err) {
       return rejectWithValue(err.message || "Failed to load categories");
     }
-  }
+  },
 );
 
 // Fetch products (list)
@@ -24,7 +24,8 @@ export const fetchProducts = createAsyncThunk(
   "technology/fetchProducts",
   async (categoryId, { rejectWithValue }) => {
     try {
-      let url = "http://localhost:8000/api/technology/product";
+      let url =
+        "https://ai-knots-it-solution.onrender.com/api/technology/product";
       if (categoryId) url += `?categoryId=${categoryId}`;
 
       const res = await fetch(url);
@@ -39,13 +40,17 @@ export const fetchProducts = createAsyncThunk(
         _id: item._id,
         title: item.title || item.name || "Untitled",
         description: item.description || "No description available",
-        date: item.updatedAt || item.createdAt
-          ? new Date(item.updatedAt || item.createdAt).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })
-          : "Recently",
+        date:
+          item.updatedAt || item.createdAt
+            ? new Date(item.updatedAt || item.createdAt).toLocaleDateString(
+                "en-US",
+                {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                },
+              )
+            : "Recently",
         category: item.category?.name || "General",
         categoryId: item.category?._id,
         image: item.images?.[0] || null,
@@ -59,7 +64,7 @@ export const fetchProducts = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message || "Failed to load products");
     }
-  }
+  },
 );
 
 // Fetch Single Post (Important for Detail Page)
@@ -67,7 +72,9 @@ export const fetchSinglePost = createAsyncThunk(
   "technology/fetchSinglePost",
   async (postId, { rejectWithValue }) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/technology/product/technology/${postId}`);
+      const res = await fetch(
+        `https://ai-knots-it-solution.onrender.com/api/technology/product/technology/${postId}`,
+      );
       if (!res.ok) throw new Error("Failed to fetch post");
 
       const data = await res.json();
@@ -96,7 +103,7 @@ export const fetchSinglePost = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message || "Failed to fetch post details");
     }
-  }
+  },
 );
 
 // Engagement Thunks
@@ -105,8 +112,8 @@ export const incrementPostView = createAsyncThunk(
   async (postId, { rejectWithValue }) => {
     try {
       const res = await fetch(
-        `http://localhost:8000/api/technology/product/technology/${postId}/view`,
-        { method: "PUT" }
+        `https://ai-knots-it-solution.onrender.com/api/technology/product/technology/${postId}/view`,
+        { method: "PUT" },
       );
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
@@ -114,21 +121,22 @@ export const incrementPostView = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  }
+  },
 );
 
 export const togglePostLike = createAsyncThunk(
   "technology/toggleLike",
   async (payload, { rejectWithValue }) => {
     try {
-      const { postId, email } = typeof payload === "string" ? { postId: payload } : payload;
+      const { postId, email } =
+        typeof payload === "string" ? { postId: payload } : payload;
       const res = await fetch(
-        `http://localhost:8000/api/technology/product/technology/${postId}/like`,
+        `https://ai-knots-it-solution.onrender.com/api/technology/product/technology/${postId}/like`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
-        }
+        },
       );
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
@@ -136,7 +144,7 @@ export const togglePostLike = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  }
+  },
 );
 
 export const sendCommentOtp = createAsyncThunk(
@@ -145,12 +153,12 @@ export const sendCommentOtp = createAsyncThunk(
     try {
       const { postId, name, email, phone } = payload;
       const res = await fetch(
-        `http://localhost:8000/api/technology/product/technology/${postId}/send-otp`,
+        `https://ai-knots-it-solution.onrender.com/api/technology/product/technology/${postId}/send-otp`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, email, phone }),
-        }
+        },
       );
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
@@ -158,7 +166,7 @@ export const sendCommentOtp = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  }
+  },
 );
 
 export const postCommentWithOtp = createAsyncThunk(
@@ -166,12 +174,12 @@ export const postCommentWithOtp = createAsyncThunk(
   async ({ postId, email, otp, comment }, { rejectWithValue }) => {
     try {
       const res = await fetch(
-        `http://localhost:8000/api/technology/product/technology/${postId}/comment`,
+        `https://ai-knots-it-solution.onrender.com/api/technology/product/technology/${postId}/comment`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, otp, comment }),
-        }
+        },
       );
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
@@ -179,7 +187,7 @@ export const postCommentWithOtp = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  }
+  },
 );
 
 // ====================== SLICE ======================
@@ -235,7 +243,7 @@ const technologySlice = createSlice({
       .addCase(fetchSinglePost.fulfilled, (state, action) => {
         state.loading = false;
         const index = state.newsItems.findIndex(
-          (item) => item._id === action.payload._id
+          (item) => item._id === action.payload._id,
         );
 
         if (index !== -1) {
@@ -252,19 +260,25 @@ const technologySlice = createSlice({
       // Engagement Cases
       .addCase(incrementPostView.fulfilled, (state, action) => {
         const { postId, views } = action.payload;
-        const item = state.newsItems.find((i) => i._id === postId || i.id === postId);
+        const item = state.newsItems.find(
+          (i) => i._id === postId || i.id === postId,
+        );
         if (item) item.views = views;
       })
 
       .addCase(togglePostLike.fulfilled, (state, action) => {
         const { postId, likes } = action.payload;
-        const item = state.newsItems.find((i) => i._id === postId || i.id === postId);
+        const item = state.newsItems.find(
+          (i) => i._id === postId || i.id === postId,
+        );
         if (item) item.likes = likes;
       })
 
       .addCase(postCommentWithOtp.fulfilled, (state, action) => {
         const { postId, comments } = action.payload;
-        const item = state.newsItems.find((i) => i._id === postId || i.id === postId);
+        const item = state.newsItems.find(
+          (i) => i._id === postId || i.id === postId,
+        );
         if (item) item.comments = comments;
       });
   },

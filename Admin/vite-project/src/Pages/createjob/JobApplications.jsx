@@ -1,6 +1,3 @@
-
-
-
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -10,12 +7,20 @@ const JobApplications = () => {
   const [error, setError] = useState(null);
   const [jobTitle, setJobTitle] = useState("");
 
-  const statusOptions = ["Pending", "Reviewed", "Shortlisted", "Rejected", "Accepted"];
+  const statusOptions = [
+    "Pending",
+    "Reviewed",
+    "Shortlisted",
+    "Rejected",
+    "Accepted",
+  ];
 
   const fetchApplications = async (jobId) => {
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:8000/jobapplication/job/${jobId}`);
+      const res = await fetch(
+        `https://ai-knots-it-solution.onrender.com/jobapplication/job/${jobId}`,
+      );
       if (!res.ok) throw new Error("Failed to fetch applications");
       const data = await res.json();
       setApplications(data.data || []);
@@ -30,7 +35,9 @@ const JobApplications = () => {
   const fetchAllApplications = async () => {
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:8000/jobapplication/");
+      const res = await fetch(
+        "https://ai-knots-it-solution.onrender.com/jobapplication/",
+      );
       if (!res.ok) throw new Error("Failed to fetch applications");
       const data = await res.json();
       setApplications(data.data || []);
@@ -68,17 +75,18 @@ const JobApplications = () => {
         mode: "cors",
       });
 
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      if (!response.ok)
+        throw new Error(`HTTP error! Status: ${response.status}`);
 
       const blob = await response.blob();
       const objectUrl = window.URL.createObjectURL(blob);
 
       const link = document.createElement("a");
       link.href = objectUrl;
-      
+
       const cleanName = name.replace(/[^a-zA-Z0-9\s-]/g, "").trim();
       const fileName = `${cleanName}_Resume_${new Date().toISOString().slice(0, 10)}.pdf`;
-      
+
       link.download = fileName;
       document.body.appendChild(link);
       link.click();
@@ -88,14 +96,14 @@ const JobApplications = () => {
       setTimeout(() => window.URL.revokeObjectURL(objectUrl), 1500);
     } catch (err) {
       console.error("Download Error:", err);
-      
+
       // Fallback: Open in new tab with attachment flag
       let fallbackUrl = url;
       if (url.includes("cloudinary.com")) {
         const separator = url.includes("?") ? "&" : "?";
         fallbackUrl = `${url}${separator}fl_attachment=true`;
       }
-      
+
       window.open(fallbackUrl, "_blank");
       alert("Direct download failed. Opening resume in new tab.");
     }
@@ -103,17 +111,20 @@ const JobApplications = () => {
 
   const updateStatus = async (id, newStatus) => {
     try {
-      const res = await fetch(`http://localhost:8000/jobapplication/${id}/status`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
-      });
+      const res = await fetch(
+        `https://ai-knots-it-solution.onrender.com/jobapplication/${id}/status`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        },
+      );
 
       if (res.ok) {
         setApplications((prev) =>
           prev.map((app) =>
-            app._id === id ? { ...app, status: newStatus } : app
-          )
+            app._id === id ? { ...app, status: newStatus } : app,
+          ),
         );
       } else {
         alert("Failed to update status");
@@ -132,7 +143,9 @@ const JobApplications = () => {
         </h1>
 
         {loading && (
-          <p className="text-center py-20 text-xl text-gray-600">Loading applications...</p>
+          <p className="text-center py-20 text-xl text-gray-600">
+            Loading applications...
+          </p>
         )}
 
         {error && (
@@ -159,14 +172,19 @@ const JobApplications = () => {
                   {app.email} • {app.phone}
                 </p>
                 <p className="text-xs text-gray-500 mt-3">
-                  Applied: {new Date(app.appliedAt || app.createdAt).toLocaleDateString("en-IN")}
+                  Applied:{" "}
+                  {new Date(app.appliedAt || app.createdAt).toLocaleDateString(
+                    "en-IN",
+                  )}
                 </p>
               </div>
 
               <div className="flex flex-col gap-3 lg:items-end">
                 {app.resumeUrl && (
                   <button
-                    onClick={() => handleDownloadResume(app.resumeUrl, app.name)}
+                    onClick={() =>
+                      handleDownloadResume(app.resumeUrl, app.name)
+                    }
                     className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-medium transition-all active:scale-95"
                   >
                     📥 Download Resume

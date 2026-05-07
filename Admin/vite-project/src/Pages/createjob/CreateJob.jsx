@@ -4,7 +4,7 @@
 // // import { useDispatch, useSelector } from "react-redux";
 // // import { createJob } from "./jobSlice";
 
-// // const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// // const API_BASE_URL = import.meta.env.VITE_API_URL || "https://ai-knots-it-solution.onrender.com";
 // // const CATEGORY_URL = `${API_BASE_URL}/category/jobapply`;
 
 // // const CreateJob = () => {
@@ -42,7 +42,6 @@
 // //     formData.append("category", form.category);
 // //     formData.append("description", form.description);
 // //     formData.append("endDate", form.endDate);
-   
 
 // //     try {
 // //       await dispatch(createJob(formData)).unwrap();
@@ -140,7 +139,7 @@
 // import { useDispatch, useSelector } from "react-redux";
 // import { createJob } from "./jobSlice";   // apna slice
 
-// const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// const API_BASE_URL = import.meta.env.VITE_API_URL || "https://ai-knots-it-solution.onrender.com";
 
 // const CreateJob = () => {
 //   const [form, setForm] = useState({
@@ -267,7 +266,8 @@ import { createJob } from "./jobSlice";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "https://ai-knots-it-solution.onrender.com";
 
 const CreateJob = () => {
   const [form, setForm] = useState({
@@ -326,7 +326,9 @@ const CreateJob = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-10">
       <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl p-8">
-        <h2 className="text-3xl font-bold mb-8 text-gray-800">Create New Job</h2>
+        <h2 className="text-3xl font-bold mb-8 text-gray-800">
+          Create New Job
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -361,7 +363,9 @@ const CreateJob = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Description</label>
+            <label className="block text-sm font-medium mb-2">
+              Description
+            </label>
             <textarea
               name="description"
               value={form.description}

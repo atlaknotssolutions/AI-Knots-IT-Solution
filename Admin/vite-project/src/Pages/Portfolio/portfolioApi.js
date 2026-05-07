@@ -2,7 +2,7 @@
 import axios from "axios";
 
 // Base URL (change this to your production URL later)
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "https://ai-knots-it-solution.onrender.com";
 
 // Optional: Create an axios instance with baseURL (recommended)
 const api = axios.create({

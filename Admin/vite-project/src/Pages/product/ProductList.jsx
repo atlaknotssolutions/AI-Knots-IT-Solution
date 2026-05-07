@@ -47,7 +47,7 @@
 
 //       const [productsRes, categoriesRes] = await Promise.all([
 //         getProductsApi(),
-//         fetch("http://localhost:8000/api/blogcategory").then((r) => r.json()),
+//         fetch("https://ai-knots-it-solution.onrender.com/api/blogcategory").then((r) => r.json()),
 //       ]);
 
 //       setProducts(productsRes.data?.data || productsRes.data || []);
@@ -588,7 +588,6 @@
 //   );
 // }
 
-
 import { useEffect, useMemo, useState } from "react";
 import {
   useReactTable,
@@ -637,7 +636,9 @@ export default function ProductTable() {
 
       const [productsRes, categoriesRes] = await Promise.all([
         getProductsApi(),
-        fetch("http://localhost:8000/api/blogcategory").then((r) => r.json()),
+        fetch(
+          "https://ai-knots-it-solution.onrender.com/api/blogcategory",
+        ).then((r) => r.json()),
       ]);
 
       setProducts(productsRes.data?.data || []);
@@ -749,7 +750,7 @@ export default function ProductTable() {
       await deleteAdminProductCommentApi(activeProductId, commentId);
       toast.success("Comment deleted successfully");
       setActiveProductComments((prev) =>
-        prev.filter((c) => c._id !== commentId)
+        prev.filter((c) => c._id !== commentId),
       );
     } catch (err) {
       toast.error(err.response?.data?.message || "Comment delete failed");
@@ -863,7 +864,7 @@ export default function ProductTable() {
         ),
       },
     ],
-    []
+    [],
   );
 
   const table = useReactTable({
@@ -918,7 +919,7 @@ export default function ProductTable() {
                       >
                         {flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                       </th>
                     ))}
@@ -935,7 +936,7 @@ export default function ProductTable() {
                       <td key={cell.id} className="py-3 px-4">
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </td>
                     ))}
@@ -957,7 +958,9 @@ export default function ProductTable() {
               </div>
             )}
 
-            <h2 className="text-xl font-bold mb-5 text-gray-800">Edit Product</h2>
+            <h2 className="text-xl font-bold mb-5 text-gray-800">
+              Edit Product
+            </h2>
 
             {/* Name */}
             <div className="mb-4">
@@ -1141,7 +1144,9 @@ export default function ProductTable() {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-sm font-semibold text-gray-800">
-                          {comment.user?.name || comment.user?.email || "Anonymous"}
+                          {comment.user?.name ||
+                            comment.user?.email ||
+                            "Anonymous"}
                         </p>
                         <p className="text-xs text-gray-500">
                           {new Date(comment.createdAt).toLocaleString()}
