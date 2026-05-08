@@ -1,188 +1,8 @@
 
 
-// import React, { useEffect } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import { Newspaper, ExternalLink, Clock, Cpu, Zap, Globe } from "lucide-react";
-
-// import {
-//   fetchTechNews,
-//   setSelectedCategory,
-// } from "./techNewsSlice/techNewsSlice.js";
-
-// const TechNews = () => {
-//   const dispatch = useDispatch();
-
-//   const {
-//     items: newsItems,
-//     selectedCategory,
-//     status,
-//     error,
-//   } = useSelector((state) => state.techNews);
-
-//   useEffect(() => {
-//     if (status === "idle") {
-//       dispatch(fetchTechNews());
-//     }
-//   }, [status, dispatch]);
-
-//   const categories = [
-//     "All",
-//     ...new Set(newsItems.map((item) => item.category)),
-//   ];
-
-//   const filteredNews =
-//     selectedCategory === "All"
-//       ? newsItems
-//       : newsItems.filter((item) => item.category === selectedCategory);
-
-//   const getIconForCategory = (category) => {
-//     const cat = (category || "").toLowerCase();
-//     if (cat.includes("ai") || cat.includes("artificial intelligence"))
-//       return <Cpu className="w-5 h-5" />;
-//     if (cat.includes("hardware")) return <Zap className="w-5 h-5" />;
-//     if (cat.includes("company") || cat.includes("update"))
-//       return <Cpu className="w-5 h-5" />;
-//     if (cat.includes("industry") || cat.includes("news"))
-//       return <Newspaper className="w-5 h-5" />;
-//     if (cat.includes("software") || cat.includes("developer"))
-//       return <Cpu className="w-5 h-5" />;
-//     return <Globe className="w-5 h-5" />;
-//   };
-
-//   if (status === "loading") {
-//     return (
-//       <div className="min-h-screen bg-black text-gray-100 flex flex-col items-center justify-center p-6">
-//         <div className="relative w-24 h-24">
-//           <div className="absolute inset-0 border-4 border-gray-800 border-t-red-600 rounded-full animate-spin"></div>
-//           <div
-//             className="absolute inset-3 border-4 border-gray-800 border-r-red-500 rounded-full animate-spin"
-//             style={{ animationDuration: "1.5s", animationDirection: "reverse" }}
-//           ></div>
-//           <div
-//             className="absolute inset-6 border-4 border-gray-800 border-b-red-400 rounded-full animate-spin"
-//             style={{ animationDuration: "2s" }}
-//           ></div>
-//           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-red-600 rounded-full animate-pulse shadow-lg shadow-red-600/50"></div>
-//         </div>
-//         <div className="mt-8 flex items-center gap-2">
-//           <Newspaper className="w-5 h-5 text-red-600 animate-pulse" />
-//           <p className="text-lg text-gray-400 animate-pulse">
-//             Loading latest tech news...
-//           </p>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   if (status === "failed") {
-//     return (
-//       <div className="min-h-screen bg-black text-gray-100 flex items-center justify-center p-6">
-//         <div className="text-xl text-red-500">
-//           {error || "Something went wrong"}
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="min-h-screen bg-black text-gray-100 p-6 md:p-10">
-//       <div className="max-w-5xl mx-auto">
-//         <div className="flex items-center justify-between mb-10">
-//           <div className="flex items-center gap-3">
-//             <Newspaper className="w-10 h-10 text-red-600" strokeWidth={2.5} />
-//             <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-//               Tech<span className="text-red-600">News</span>
-//             </h1>
-//           </div>
-//         </div>
-
-//         <div className="flex flex-wrap gap-3 mb-10">
-//           {categories.map((category) => (
-//             <button
-//               key={category}
-//               onClick={() => dispatch(setSelectedCategory(category))}
-//               className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-//                 selectedCategory === category
-//                   ? "bg-red-600 text-white shadow-lg shadow-red-900/40"
-//                   : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700"
-//               }`}
-//             >
-//               {category}
-//             </button>
-//           ))}
-//         </div>
-
-//         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-//           {filteredNews.map((item) => (
-//             <div
-//               key={item.id}
-//               className="group bg-gray-900 border border-gray-800 rounded-xl overflow-hidden hover:border-red-600/50 transition-all duration-300 hover:shadow-xl hover:shadow-red-900/20"
-//             >
-//               <div className="bg-gradient-to-r from-red-950/30 to-transparent p-5 border-b border-gray-800">
-//                 <div className="flex items-center justify-between">
-//                   <div className="flex items-center gap-3">
-//                     <div className="p-2 bg-red-900/30 rounded-lg text-red-500">
-//                       {getIconForCategory(item.category)}
-//                     </div>
-//                     <span className="text-xs font-semibold uppercase tracking-wider text-red-400">
-//                       {item.category}
-//                     </span>
-//                   </div>
-//                   <div className="flex items-center gap-1 text-gray-500 text-xs">
-//                     <Clock className="w-3.5 h-3.5" />
-//                     {item.date}
-//                   </div>
-//                 </div>
-//               </div>
-
-//               {item.image && (
-//                 <div className="h-48 overflow-hidden">
-//                   <img
-//                     src={item.image}
-//                     alt={item.title}
-//                     loading="lazy"
-//                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-//                   />
-//                 </div>
-//               )}
-
-//               <div className="p-6">
-//                 <h2 className="text-xl font-bold mb-3 group-hover:text-red-500 transition-colors">
-//                   {item.title}
-//                 </h2>
-//                 <p className="text-gray-300 text-sm leading-relaxed mb-6 line-clamp-3">
-//                   {item.description}
-//                 </p>
-
-//                 <a
-//                   href={item.link}
-//                   target="_blank"
-//                   rel="noopener noreferrer"
-//                   className="inline-flex items-center gap-2 text-red-500 hover:text-red-400 font-medium text-sm transition-colors"
-//                 >
-//                   Read more
-//                   <ExternalLink className="w-4 h-4" />
-//                 </a>
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-
-//         {filteredNews.length === 0 && (
-//           <div className="text-center text-gray-400 mt-12 text-lg">
-//             No news found in this category.
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default TechNews;
-
-
 // import React, { useEffect, useState } from "react";
 // import { useDispatch, useSelector } from "react-redux";
+// import { useTheme } from "../context/ThemeContext";
 // import { Newspaper, ExternalLink, Clock, Cpu, Zap, Globe, ArrowUp } from "lucide-react";
 
 // import {
@@ -191,6 +11,7 @@
 // } from "./techNewsSlice/techNewsSlice.js";
 
 // const TechNews = () => {
+//   const { isDark } = useTheme();   // ← Theme Hook Added
 //   const dispatch = useDispatch();
 
 //   const {
@@ -249,24 +70,34 @@
 //     return <Globe className="w-5 h-5" />;
 //   };
 
+//   // ====================== THEME CLASSES ======================
+//   const cardClass = isDark
+//     ? "bg-gray-900 border border-gray-800 hover:border-red-600/50 hover:shadow-xl hover:shadow-red-900/20"
+//     : "bg-white border border-gray-200 shadow-lg hover:shadow-2xl";
+
+//   const headingClass = isDark ? "text-white" : "text-gray-900";
+//   const bodyClass = isDark ? "text-gray-300" : "text-gray-700";
+//   const accentClass = "text-red-600";
+
 //   if (status === "loading") {
 //     return (
-//       <div className="min-h-screen bg-black text-gray-100 flex flex-col items-center justify-center p-6">
+//       <div className={`min-h-screen flex flex-col items-center justify-center p-6 transition-colors duration-700
+//         ${isDark ? "bg-black text-gray-100" : "bg-gray-50 text-gray-900"}`}>
 //         <div className="relative w-24 h-24">
-//           <div className="absolute inset-0 border-4 border-gray-800 border-t-red-600 rounded-full animate-spin"></div>
+//           <div className="absolute inset-0 border-4 border-gray-300 border-t-red-600 rounded-full animate-spin"></div>
 //           <div
-//             className="absolute inset-3 border-4 border-gray-800 border-r-red-500 rounded-full animate-spin"
+//             className="absolute inset-3 border-4 border-gray-300 border-r-red-500 rounded-full animate-spin"
 //             style={{ animationDuration: "1.5s", animationDirection: "reverse" }}
 //           ></div>
 //           <div
-//             className="absolute inset-6 border-4 border-gray-800 border-b-red-400 rounded-full animate-spin"
+//             className="absolute inset-6 border-4 border-gray-300 border-b-red-400 rounded-full animate-spin"
 //             style={{ animationDuration: "2s" }}
 //           ></div>
 //           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-red-600 rounded-full animate-pulse shadow-lg shadow-red-600/50"></div>
 //         </div>
 //         <div className="mt-8 flex items-center gap-2">
 //           <Newspaper className="w-5 h-5 text-red-600 animate-pulse" />
-//           <p className="text-lg text-gray-400 animate-pulse">
+//           <p className={`text-lg ${bodyClass} animate-pulse`}>
 //             Loading latest tech news...
 //           </p>
 //         </div>
@@ -276,7 +107,8 @@
 
 //   if (status === "failed") {
 //     return (
-//       <div className="min-h-screen bg-black text-gray-100 flex items-center justify-center p-6">
+//       <div className={`min-h-screen flex items-center justify-center p-6 transition-colors duration-700
+//         ${isDark ? "bg-black text-gray-100" : "bg-gray-50 text-gray-900"}`}>
 //         <div className="text-xl text-red-500">
 //           {error || "Something went wrong"}
 //         </div>
@@ -285,17 +117,20 @@
 //   }
 
 //   return (
-//     <div className="min-h-screen bg-black text-gray-100 p-6 md:p-10 relative">
+//     <div className={`min-h-screen p-6 md:p-10 relative transition-colors duration-700
+//       ${isDark ? "bg-black text-gray-100" : "bg-gray-50 text-gray-900"}`}>
+
 //       <div className="max-w-5xl mx-auto">
 //         <div className="flex items-center justify-between mb-10">
 //           <div className="flex items-center gap-3">
-//             <Newspaper className="w-10 h-10 text-red-600" strokeWidth={2.5} />
-//             <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-//               Tech<span className="text-red-600">News</span>
+//             <Newspaper className={`w-10 h-10 ${accentClass}`} strokeWidth={2.5} />
+//             <h1 className={`text-4xl md:text-5xl font-bold tracking-tight ${headingClass}`}>
+//               Tech<span className={accentClass}>News</span>
 //             </h1>
 //           </div>
 //         </div>
 
+//         {/* Category Buttons */}
 //         <div className="flex flex-wrap gap-3 mb-10">
 //           {categories.map((category) => (
 //             <button
@@ -304,7 +139,9 @@
 //               className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
 //                 selectedCategory === category
 //                   ? "bg-red-600 text-white shadow-lg shadow-red-900/40"
-//                   : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700"
+//                   : isDark
+//                     ? "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700"
+//                     : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300 hover:border-red-600"
 //               }`}
 //             >
 //               {category}
@@ -312,23 +149,24 @@
 //           ))}
 //         </div>
 
+//         {/* News Grid */}
 //         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 //           {filteredNews.map((item) => (
 //             <div
 //               key={item.id}
-//               className="group bg-gray-900 border border-gray-800 rounded-xl overflow-hidden hover:border-red-600/50 transition-all duration-300 hover:shadow-xl hover:shadow-red-900/20"
+//               className={`group rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl ${cardClass}`}
 //             >
-//               <div className="bg-gradient-to-r from-red-950/30 to-transparent p-5 border-b border-gray-800">
+//               <div className={`p-5 border-b ${isDark ? "border-gray-800" : "border-gray-200"}`}>
 //                 <div className="flex items-center justify-between">
 //                   <div className="flex items-center gap-3">
-//                     <div className="p-2 bg-red-900/30 rounded-lg text-red-500">
+//                     <div className={`p-2 rounded-lg ${isDark ? "bg-red-900/30" : "bg-red-100"} text-red-500`}>
 //                       {getIconForCategory(item.category)}
 //                     </div>
-//                     <span className="text-xs font-semibold uppercase tracking-wider text-red-400">
+//                     <span className={`text-xs font-semibold uppercase tracking-wider ${accentClass}`}>
 //                       {item.category}
 //                     </span>
 //                   </div>
-//                   <div className="flex items-center gap-1 text-gray-500 text-xs">
+//                   <div className={`flex items-center gap-1 text-xs ${bodyClass}`}>
 //                     <Clock className="w-3.5 h-3.5" />
 //                     {item.date}
 //                   </div>
@@ -347,10 +185,10 @@
 //               )}
 
 //               <div className="p-6">
-//                 <h2 className="text-xl font-bold mb-3 group-hover:text-red-500 transition-colors">
+//                 <h2 className={`text-xl font-bold mb-3 group-hover:text-red-500 transition-colors ${headingClass}`}>
 //                   {item.title}
 //                 </h2>
-//                 <p className="text-gray-300 text-sm leading-relaxed mb-6 line-clamp-3">
+//                 <p className={`text-sm leading-relaxed mb-6 line-clamp-3 ${bodyClass}`}>
 //                   {item.description}
 //                 </p>
 
@@ -358,7 +196,7 @@
 //                   href={item.link}
 //                   target="_blank"
 //                   rel="noopener noreferrer"
-//                   className="inline-flex items-center gap-2 text-red-500 hover:text-red-400 font-medium text-sm transition-colors"
+//                   className={`inline-flex items-center gap-2 font-medium text-sm transition-colors ${accentClass} hover:text-red-400`}
 //                 >
 //                   Read more
 //                   <ExternalLink className="w-4 h-4" />
@@ -369,7 +207,7 @@
 //         </div>
 
 //         {filteredNews.length === 0 && (
-//           <div className="text-center text-gray-400 mt-12 text-lg">
+//           <div className={`text-center text-lg mt-12 ${bodyClass}`}>
 //             No news found in this category.
 //           </div>
 //         )}
@@ -398,13 +236,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { useTheme } from "../context/ThemeContext";
 import { Newspaper, ExternalLink, Clock, Cpu, Zap, Globe, ArrowUp } from "lucide-react";
 
+import DOMPurify from "dompurify";
+
 import {
   fetchTechNews,
   setSelectedCategory,
 } from "./techNewsSlice/techNewsSlice.js";
 
 const TechNews = () => {
-  const { isDark } = useTheme();   // ← Theme Hook Added
+  const { isDark } = useTheme();
   const dispatch = useDispatch();
 
   const {
@@ -422,7 +262,7 @@ const TechNews = () => {
     }
   }, [status, dispatch]);
 
-  // Scroll to top visibility logic
+  // Scroll to top
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 400);
@@ -433,10 +273,7 @@ const TechNews = () => {
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const categories = [
@@ -472,27 +309,28 @@ const TechNews = () => {
   const bodyClass = isDark ? "text-gray-300" : "text-gray-700";
   const accentClass = "text-red-600";
 
+  // Sanitize function
+  const sanitize = (html) => {
+    return DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ["b", "i", "em", "strong", "p", "br", "ul", "ol", "li", "a"],
+      ALLOWED_ATTR: ["href", "target", "rel"],
+    });
+  };
+
   if (status === "loading") {
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center p-6 transition-colors duration-700
         ${isDark ? "bg-black text-gray-100" : "bg-gray-50 text-gray-900"}`}>
+        {/* ... loading UI unchanged ... */}
         <div className="relative w-24 h-24">
           <div className="absolute inset-0 border-4 border-gray-300 border-t-red-600 rounded-full animate-spin"></div>
-          <div
-            className="absolute inset-3 border-4 border-gray-300 border-r-red-500 rounded-full animate-spin"
-            style={{ animationDuration: "1.5s", animationDirection: "reverse" }}
-          ></div>
-          <div
-            className="absolute inset-6 border-4 border-gray-300 border-b-red-400 rounded-full animate-spin"
-            style={{ animationDuration: "2s" }}
-          ></div>
+          <div className="absolute inset-3 border-4 border-gray-300 border-r-red-500 rounded-full animate-spin" style={{ animationDuration: "1.5s", animationDirection: "reverse" }}></div>
+          <div className="absolute inset-6 border-4 border-gray-300 border-b-red-400 rounded-full animate-spin" style={{ animationDuration: "2s" }}></div>
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-red-600 rounded-full animate-pulse shadow-lg shadow-red-600/50"></div>
         </div>
         <div className="mt-8 flex items-center gap-2">
           <Newspaper className="w-5 h-5 text-red-600 animate-pulse" />
-          <p className={`text-lg ${bodyClass} animate-pulse`}>
-            Loading latest tech news...
-          </p>
+          <p className={`text-lg ${bodyClass} animate-pulse`}>Loading latest tech news...</p>
         </div>
       </div>
     );
@@ -502,9 +340,7 @@ const TechNews = () => {
     return (
       <div className={`min-h-screen flex items-center justify-center p-6 transition-colors duration-700
         ${isDark ? "bg-black text-gray-100" : "bg-gray-50 text-gray-900"}`}>
-        <div className="text-xl text-red-500">
-          {error || "Something went wrong"}
-        </div>
+        <div className="text-xl text-red-500">{error || "Something went wrong"}</div>
       </div>
     );
   }
@@ -514,6 +350,7 @@ const TechNews = () => {
       ${isDark ? "bg-black text-gray-100" : "bg-gray-50 text-gray-900"}`}>
 
       <div className="max-w-5xl mx-auto">
+        {/* Header */}
         <div className="flex items-center justify-between mb-10">
           <div className="flex items-center gap-3">
             <Newspaper className={`w-10 h-10 ${accentClass}`} strokeWidth={2.5} />
@@ -581,9 +418,14 @@ const TechNews = () => {
                 <h2 className={`text-xl font-bold mb-3 group-hover:text-red-500 transition-colors ${headingClass}`}>
                   {item.title}
                 </h2>
-                <p className={`text-sm leading-relaxed mb-6 line-clamp-3 ${bodyClass}`}>
-                  {item.description}
-                </p>
+
+                {/* Safely render description as HTML */}
+                <div
+                  className={`text-sm leading-relaxed mb-6 line-clamp-3 ${bodyClass}`}
+                  dangerouslySetInnerHTML={{
+                    __html: sanitize(item.description || ""),
+                  }}
+                />
 
                 <a
                   href={item.link}
@@ -610,9 +452,7 @@ const TechNews = () => {
       <button
         onClick={scrollToTop}
         className={`fixed bottom-6 right-6 z-50 p-4 rounded-full bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-900/50 transition-all duration-300 hover:scale-110 active:scale-95 ${
-          showScrollTop
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 translate-y-16 pointer-events-none"
+          showScrollTop ? "opacity-100 translate-y-0" : "opacity-0 translate-y-16 pointer-events-none"
         }`}
         aria-label="Scroll to top"
       >

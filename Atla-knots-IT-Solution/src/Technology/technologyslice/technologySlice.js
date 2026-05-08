@@ -8,7 +8,7 @@ export const fetchCategories = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await fetch(
-        "https://ai-knots-it-solution.onrender.com/api/technology/category",
+        "https://ai-knots-it-solution-1.onrender.com/api/technology/category",
       );
       if (!res.ok) throw new Error("Failed to fetch categories");
       const data = await res.json();
@@ -25,7 +25,7 @@ export const fetchProducts = createAsyncThunk(
   async (categoryId, { rejectWithValue }) => {
     try {
       let url =
-        "https://ai-knots-it-solution.onrender.com/api/technology/product";
+        "https://ai-knots-it-solution-1.onrender.com/api/technology/product";
       if (categoryId) url += `?categoryId=${categoryId}`;
 
       const res = await fetch(url);
@@ -73,7 +73,7 @@ export const fetchSinglePost = createAsyncThunk(
   async (postId, { rejectWithValue }) => {
     try {
       const res = await fetch(
-        `https://ai-knots-it-solution.onrender.com/api/technology/product/technology/${postId}`,
+        `https://ai-knots-it-solution-1.onrender.com/api/technology/product/technology/${postId}`,
       );
       if (!res.ok) throw new Error("Failed to fetch post");
 
@@ -112,7 +112,7 @@ export const incrementPostView = createAsyncThunk(
   async (postId, { rejectWithValue }) => {
     try {
       const res = await fetch(
-        `https://ai-knots-it-solution.onrender.com/api/technology/product/technology/${postId}/view`,
+        `https://ai-knots-it-solution-1.onrender.com/api/technology/product/technology/${postId}/view`,
         { method: "PUT" },
       );
       const data = await res.json();
@@ -131,7 +131,7 @@ export const togglePostLike = createAsyncThunk(
       const { postId, email } =
         typeof payload === "string" ? { postId: payload } : payload;
       const res = await fetch(
-        `https://ai-knots-it-solution.onrender.com/api/technology/product/technology/${postId}/like`,
+        `https://ai-knots-it-solution-1.onrender.com/api/technology/product/technology/${postId}/like`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -153,7 +153,7 @@ export const sendCommentOtp = createAsyncThunk(
     try {
       const { postId, name, email, phone } = payload;
       const res = await fetch(
-        `https://ai-knots-it-solution.onrender.com/api/technology/product/technology/${postId}/send-otp`,
+        `https://ai-knots-it-solution-1.onrender.com/api/technology/product/technology/${postId}/send-otp`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -174,7 +174,7 @@ export const postCommentWithOtp = createAsyncThunk(
   async ({ postId, email, otp, comment }, { rejectWithValue }) => {
     try {
       const res = await fetch(
-        `https://ai-knots-it-solution.onrender.com/api/technology/product/technology/${postId}/comment`,
+        `https://ai-knots-it-solution-1.onrender.com/api/technology/product/technology/${postId}/comment`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

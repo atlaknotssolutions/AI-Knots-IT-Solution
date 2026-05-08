@@ -2,7 +2,7 @@
 import axios from "axios";
 
 // Base URL (change this to your production URL later)
-const API_BASE_URL = "https://ai-knots-it-solution.onrender.com";
+const API_BASE_URL = "https://ai-knots-it-solution-1.onrender.com";
 
 // Optional: Create an axios instance with baseURL (recommended)
 const api = axios.create({
