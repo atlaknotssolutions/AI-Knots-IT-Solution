@@ -19,7 +19,7 @@ const JobApplications = () => {
     try {
       setLoading(true);
       const res = await fetch(
-        `https://ai-knots-it-solution.onrender.com/jobapplication/job/${jobId}`,
+        `http://localhost:8000/jobapplication/job/${jobId}`,
       );
       if (!res.ok) throw new Error("Failed to fetch applications");
       const data = await res.json();
@@ -35,9 +35,7 @@ const JobApplications = () => {
   const fetchAllApplications = async () => {
     try {
       setLoading(true);
-      const res = await fetch(
-        "https://ai-knots-it-solution.onrender.com/jobapplication/",
-      );
+      const res = await fetch("http://localhost:8000/jobapplication/");
       if (!res.ok) throw new Error("Failed to fetch applications");
       const data = await res.json();
       setApplications(data.data || []);
@@ -112,7 +110,7 @@ const JobApplications = () => {
   const updateStatus = async (id, newStatus) => {
     try {
       const res = await fetch(
-        `https://ai-knots-it-solution.onrender.com/jobapplication/${id}/status`,
+        `http://localhost:8000/jobapplication/${id}/status`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

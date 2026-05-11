@@ -1,33 +1,130 @@
+
+
 const imagekit = require("../../utils/imagekit.js");
 const Product = require("../../module/homemodule/homemodule");
 const Category = require("../../module/BlogModule/caetgorymodule.js");
+const slugify = require("slugify");        // ← npm install slugify
 const nodemailer = require("nodemailer");
 const otpGenerator = require("otp-generator");
 const PopUser = require("../../module/popmodule.js");
 
+// ==================== SLUG HELPER ====================
+const generateUniqueSlug = async (name, excludeId = null) => {
+  let baseSlug = slugify(name || "", { lower: true, strict: true });
+  if (!baseSlug) baseSlug = `blog-${Date.now()}`;
+
+  let slug = baseSlug;
+  let counter = 1;
+
+  while (true) {
+    const existing = await Product.findOne({
+      slug,
+      _id: { $ne: excludeId }
+    });
+    if (!existing) break;
+
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+  return slug;
+};
+// ============================
+// CREATE PRODUCT
+// ============================
+// const createContent = async (req, res) => {
+//   try {
+//     const { name, description, category, author } = req.body;
+
+//     if (!name || !description || !category || !author) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Name, description, category & author are required",
+//       });
+//     }
+
+//     const categoryExists = await Category.findById(category);
+//     if (!categoryExists) {
+//       return res.status(404).json({ success: false, message: "Category not found" });
+//     }
+
+//     const slug = await generateUniqueSlug(name);
+
+//     // Image Handling
+//     const getFiles = () => {
+//       if (!req.files) return null;
+//       const keys = ["images", "image", "file", "files", "images[]"];
+//       for (const key of keys) {
+//         if (req.files[key]) return req.files[key];
+//       }
+//       const firstKey = Object.keys(req.files)[0];
+//       return firstKey ? req.files[firstKey] : null;
+//     };
+
+//     const incomingFiles = getFiles();
+//     if (!incomingFiles) {
+//       return res.status(400).json({ success: false, message: "Image is required" });
+//     }
+
+//     const files = Array.isArray(incomingFiles) ? incomingFiles : [incomingFiles];
+//     const uploadedImages = [];
+
+//     for (let file of files) {
+//       const uploadResponse = await imagekit.upload({
+//         file: file.data.toString("base64"),
+//         fileName: `product-${Date.now()}-${file.name}`,
+//         folder: "/productImages",
+//       });
+//       uploadedImages.push(uploadResponse.url);
+//     }
+
+//     const newProduct = new Product({
+//       name,
+//       slug,                    // ← Added
+//       description,
+//       category,
+//       author,
+//       images: uploadedImages,
+//     });
+
+//     await newProduct.save();
+
+//     return res.status(201).json({
+//       success: true,
+//       message: "Product created successfully",
+//       data: newProduct,
+//     });
+//   } catch (error) {
+//     console.error("Error creating product:", error);
+//     return res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+
+
+
+// ============================ CREATE ============================
 const createContent = async (req, res) => {
   try {
     const { name, description, category, author } = req.body;
 
-    if (!name || !description || !category || !author) {
+    if (!name || !description || !category) {
       return res.status(400).json({
         success: false,
-        message: "Name, description, and category are required",
+        message: "Name, description & category are required",
       });
     }
 
-    // ✅ Check Category Exist
     const categoryExists = await Category.findById(category);
     if (!categoryExists) {
-      return res.status(404).json({
-        success: false,
-        message: "Category not found",
-      });
+      return res.status(404).json({ success: false, message: "Category not found" });
     }
 
+    const slug = await generateUniqueSlug(name);
+
+    // Image Handling
     const getFiles = () => {
       if (!req.files) return null;
-      const keys = ["images", "image", "file", "files", "images[]"];
+      const keys = ["images", "image", "files", "images[]"];
       for (const key of keys) {
         if (req.files[key]) return req.files[key];
       }
@@ -37,31 +134,27 @@ const createContent = async (req, res) => {
 
     const incomingFiles = getFiles();
     if (!incomingFiles) {
-      return res.status(400).json({
-        success: false,
-        message: "Image is required",
-      });
+      return res.status(400).json({ success: false, message: "Image is required" });
     }
 
-    const files = Array.isArray(incomingFiles)
-      ? incomingFiles
-      : [incomingFiles];
+    const files = Array.isArray(incomingFiles) ? incomingFiles : [incomingFiles];
     const uploadedImages = [];
 
     for (let file of files) {
       const uploadResponse = await imagekit.upload({
         file: file.data.toString("base64"),
-        fileName: file.name,
+        fileName: `blog-${Date.now()}-${file.name}`,
+        folder: "/blogImages",
       });
-
       uploadedImages.push(uploadResponse.url);
     }
 
     const newProduct = new Product({
       name,
+      slug,
       description,
       category,
-      author,
+      author: author || "Admin",
       images: uploadedImages,
     });
 
@@ -69,41 +162,106 @@ const createContent = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "Product created successfully",
+      message: "Blog created successfully",
       data: newProduct,
     });
   } catch (error) {
-    console.error("Error creating product:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    console.error("Create Error:", error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// ============================
-// GET ALL PRODUCTS
-// ============================
-const getHomeData = async (req, res) => {
+// ============================ GET SINGLE BY SLUG ============================
+const getSingleContent = async (req, res) => {
   try {
-    const products = await Product.find()
-      .populate("category")
-      .sort({ createdAt: -1 });
+    const { slug } = req.params;
+
+    const product = await Product.findOne({ slug })
+      .populate("category", "name slug")
+      .populate({
+        path: "comments.user",
+        select: "name email avatar",
+      })
+      .lean();
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Blog not found" });
+    }
 
     return res.status(200).json({
       success: true,
-      data: products,
+      data: product,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch products",
-      error: error.message,
-    });
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
+// ============================ UPDATE ============================
+const updateHomeData = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, author, category, updateSlug = true } = req.body;
+
+    const updateFields = {};
+
+    if (name?.trim()) {
+      updateFields.name = name.trim();
+      if (updateSlug) {
+        updateFields.slug = await generateUniqueSlug(name.trim(), id);
+      }
+    }
+
+    if (description?.trim()) updateFields.description = description.trim();
+    if (author?.trim()) updateFields.author = author.trim();
+
+    if (category) {
+      const catExists = await Category.findById(category);
+      if (!catExists) return res.status(404).json({ success: false, message: "Category not found" });
+      updateFields.category = category;
+    }
+
+    // Image update (same as before)
+    if (req.files?.images) {
+      const files = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
+      const uploadedImages = [];
+      for (const file of files) {
+        const uploadRes = await imagekit.upload({
+          file: file.data.toString("base64"),
+          fileName: `blog-update-${Date.now()}-${file.name}`,
+          folder: "/blogImages",
+        });
+        uploadedImages.push(uploadRes.url);
+      }
+      updateFields.images = uploadedImages;
+    }
+
+    const updated = await Product.findByIdAndUpdate(id, updateFields, { new: true })
+      .populate("category", "name");
+
+    if (!updated) return res.status(404).json({ success: false, message: "Blog not found" });
+
+    res.status(200).json({ success: true, data: updated });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ============================ GET ALL ============================
+const getHomeData = async (req, res) => {
+  try {
+    const products = await Product.find()
+      .populate("category", "name slug")
+      .select("name slug description images views likes createdAt author")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.status(200).json({ success: true, data: products });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
 const getAdminProducts = async (req, res) => {
   try {
     const { limit = 15, page = 1, search = "", category = "" } = req.query;
@@ -203,109 +361,149 @@ const getAdminProducts = async (req, res) => {
     });
   }
 };
+// ============================
+// GET ALL PRODUCTS
+// ============================
+// const getHomeData = async (req, res) => {
+//   try {
+//     const products = await Product.find()
+//       .populate("category")
+//       .sort({ createdAt: -1 })
+//       .lean();
+
+//     // Ensure old products also have slug
+//     const normalized = products.map(p => {
+//       if (!p.slug && p.name) {
+//         p.slug = slugify(p.name, { lower: true, strict: true }) || `product-${p._id}`;
+//       }
+//       return p;
+//     });
+
+//     return res.status(200).json({ success: true, data: normalized });
+//   } catch (error) {
+//     return res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+// // ============================
+// // GET SINGLE PRODUCT BY SLUG (Recommended for Frontend)
+// // ============================
+// const getSingleContent = async (req, res) => {
+//   try {
+//     const { slug } = req.params;
+
+//     if (!slug) {
+//       return res.status(400).json({ success: false, message: "Slug is required" });
+//     }
+
+//     const product = await Product.findOne({ slug })
+//       .populate({
+//         path: "category",
+//         select: "name description slug",
+//       })
+//       .populate({
+//         path: "comments.user",
+//         select: "name email avatar",
+//       })
+//       .lean();
+
+//     if (!product) {
+//       return res.status(404).json({ success: false, message: "Product not found" });
+//     }
+
+//     // Optional: Increase view count
+//     // await Product.findByIdAndUpdate(product._id, { $inc: { views: 1 } });
+
+//     return res.status(200).json({
+//       success: true,
+//       message: "Product fetched successfully",
+//       data: product,
+//     });
+//   } catch (error) {
+//     console.error("GET SINGLE PRODUCT ERROR:", error);
+//     return res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+// // ============================
+// // UPDATE PRODUCT
+// // ============================
+// const updateHomeData = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const { name, description, author, category, updateSlug = false } = req.body;
+
+//     const updateFields = {};
+
+//     if (name?.trim()) {
+//       updateFields.name = name.trim();
+//       if (updateSlug) {
+//         updateFields.slug = await generateUniqueSlug(name.trim(), id);
+//       }
+//     }
+
+//     if (description?.trim()) updateFields.description = description.trim();
+//     if (author?.trim()) updateFields.author = author.trim();
+
+//     if (category?.trim()) {
+//       const categoryExists = await Category.findById(category);
+//       if (!categoryExists) {
+//         return res.status(404).json({ success: false, message: "Category not found" });
+//       }
+//       updateFields.category = category;
+//     }
+
+//     // Image Update
+//     if (req.files?.images) {
+//       const files = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
+//       const uploadedImages = [];
+
+//       for (const file of files) {
+//         const uploadRes = await imagekit.upload({
+//           file: file.data.toString("base64"),
+//           fileName: `product-update-${Date.now()}-${file.name}`,
+//           folder: "/productImages",
+//         });
+//         uploadedImages.push(uploadRes.url);
+//       }
+//       updateFields.images = uploadedImages;
+//     }
+
+//     if (Object.keys(updateFields).length === 0) {
+//       return res.status(400).json({ success: false, message: "No fields to update" });
+//     }
+
+//     const updatedProduct = await Product.findByIdAndUpdate(
+//       id,
+//       { $set: updateFields },
+//       { new: true, runValidators: true }
+//     ).populate("category", "name");
+
+//     if (!updatedProduct) {
+//       return res.status(404).json({ success: false, message: "Product not found" });
+//     }
+
+//     return res.status(200).json({
+//       success: true,
+//       message: "Product updated successfully",
+//       data: updatedProduct,
+//     });
+//   } catch (error) {
+//     console.error("Update Error:", error);
+//     return res.status(500).json({ success: false, message: error.message });
+//   }
+// };
 
 // ============================
-// UPDATE PRODUCT
-// ============================
-const updateHomeData = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, description, author, category } = req.body;
-
-    const updateFields = {};
-
-    if (name?.trim()) {
-      updateFields.name = name.trim();
-    }
-
-    if (description?.trim()) {
-      updateFields.description = description.trim();
-    }
-
-    if (author?.trim()) {
-      updateFields.author = author.trim();
-    }
-
-    if (category?.trim()) {
-      const categoryExists = await Category.findById(category);
-      if (!categoryExists) {
-        return res.status(404).json({
-          success: false,
-          message: "Category not found",
-        });
-      }
-      updateFields.category = category;
-    }
-
-    // Handle image replacement (if new images sent → replace all)
-    if (req.files && req.files.images) {
-      const files = Array.isArray(req.files.images)
-        ? req.files.images
-        : [req.files.images];
-      const uploadedImages = [];
-
-      for (const file of files) {
-        const uploadRes = await imagekit.upload({
-          file: file.data.toString("base64"),
-          fileName: `product-update-${Date.now()}-${file.name}`,
-          useUniqueFileName: true,
-        });
-        uploadedImages.push(uploadRes.url);
-      }
-
-      updateFields.images = uploadedImages;
-    }
-
-    // Prevent empty update
-    if (Object.keys(updateFields).length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "No valid fields provided for update",
-      });
-    }
-
-    const updatedProduct = await Product.findByIdAndUpdate(
-      id,
-      { $set: updateFields },
-      { new: true, runValidators: true },
-    ).populate("category", "name");
-
-    if (!updatedProduct) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Product updated successfully",
-      data: updatedProduct,
-    });
-  } catch (error) {
-    console.error("Update Error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message,
-    });
-  }
-};
-
-// ============================
-// DELETE PRODUCT
+// DELETE + Other Functions (Unchanged)
 // ============================
 const deletedContent = async (req, res) => {
   try {
     const { id } = req.params;
-
     const deletedProduct = await Product.findByIdAndDelete(id);
 
     if (!deletedProduct) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
+      return res.status(404).json({ success: false, message: "Product not found" });
     }
 
     return res.status(200).json({
@@ -314,59 +512,7 @@ const deletedContent = async (req, res) => {
       data: deletedProduct,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to delete product",
-      error: error.message,
-    });
-  }
-};
-
-const getSingleContent = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // Validate MongoDB ObjectId
-    if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid product ID format",
-      });
-    }
-
-    const product = await Product.findById(id)
-      .populate({
-        path: "category",
-        select: "name description slug", // added slug if needed
-      })
-      .populate({
-        path: "comments.user",
-        select: "name email avatar", // better fields
-      })
-      .lean(); // Convert to plain JS object (faster)
-
-    if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
-    }
-
-    // Optional: Increase view count
-    // await Product.findByIdAndUpdate(id, { $inc: { views: 1 } });
-
-    return res.status(200).json({
-      success: true,
-      message: "Product fetched successfully",
-      data: product,
-    });
-  } catch (error) {
-    console.error("GET SINGLE PRODUCT ERROR:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Server error while fetching product",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
-    });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 

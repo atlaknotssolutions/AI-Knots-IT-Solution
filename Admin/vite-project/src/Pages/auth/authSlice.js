@@ -9,7 +9,7 @@ export const loginUser = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        "https://ai-knots-it-solution.onrender.com/api/auth/login",
+        "http://localhost:8000/api/auth/login",
         credentials,
         {
           headers: { "Content-Type": "application/json" },

@@ -47,7 +47,7 @@
 
 //       const [productsRes, categoriesRes] = await Promise.all([
 //         getProductsApi(),
-//         fetch("https://ai-knots-it-solution.onrender.com/api/blogcategory").then((r) => r.json()),
+//         fetch("http://localhost:8000/api/blogcategory").then((r) => r.json()),
 //       ]);
 
 //       setProducts(productsRes.data?.data || productsRes.data || []);
@@ -636,9 +636,7 @@ export default function ProductTable() {
 
       const [productsRes, categoriesRes] = await Promise.all([
         getProductsApi(),
-        fetch(
-          "https://ai-knots-it-solution.onrender.com/api/blogcategory",
-        ).then((r) => r.json()),
+        fetch("http://localhost:8000/api/blogcategory").then((r) => r.json()),
       ]);
 
       setProducts(productsRes.data?.data || []);

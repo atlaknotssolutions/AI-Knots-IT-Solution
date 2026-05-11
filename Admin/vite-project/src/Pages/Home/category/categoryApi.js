@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://ai-knots-it-solution.onrender.com/api/blogcategory",
+  baseURL: "http://localhost:8000/api/blogcategory",
 });
 
 // CREATE

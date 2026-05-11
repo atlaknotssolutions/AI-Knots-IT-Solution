@@ -29,7 +29,7 @@ router.delete(
   "/product/:productId/admin-comment/:commentId",
   deleteAdminComment,
 ); // Admin delete single comment
-router.get("/product/:id", getSingleContent); // Get single post by ID (used in frontend) - must come after specific routes
+router.get("/product/:slug", getSingleContent); // Get single post by slug (used in frontend) - must come after specific routes
 router.put("/product/:id", updateHomeData); // Update post
 router.delete("/product/:id", deletedContent); // Delete post
 

@@ -333,8 +333,16 @@ const navItems = [
 
   { path: "/gallery", label: "Gallery", icon: GalleryHorizontal },
 
-  { path: "/contact", label: "Contact", icon: Contact2 },
+
+    {
+    label: "Contact",
+    icon: BarChart3,
+    children: [
+      { path: "/contact", label: "Contact", icon: Contact2 },
   { path: "/queries", label: "Queries", icon: TextSearch, bottom: true },
+    ],
+  },
+ 
 ];
 
 export default function Sidebar() {
@@ -388,7 +396,7 @@ export default function Sidebar() {
           {/* Logo / Header */}
           <div className="p-6 border-b border-gray-800/60">
             <h1 className="text-2xl font-bold tracking-tight">
-              AtlaKnots<span className="text-blue-500 ml-1.5">Admin</span>
+              AI Knots<span className="text-blue-500 ml-1.5">Admin</span>
             </h1>
             <p className="text-xs text-gray-500 mt-1">Management Panel</p>
           </div>

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "https://ai-knots-it-solution.onrender.com/api/contact";
+const API = "http://localhost:8000/api/contact";
 
 // GET All Contacts
 export const getContactsApi = () => {
