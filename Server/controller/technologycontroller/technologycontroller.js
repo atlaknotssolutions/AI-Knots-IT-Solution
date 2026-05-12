@@ -4,14 +4,13 @@
 // const nodemailer = require("nodemailer");
 // const otpGenerator = require("otp-generator");
 // const PopUser = require("../../module/popmodule.js");
-// const slugify = require("slugify"); 
-
+// const slugify = require("slugify");
 
 // const generateUniqueSlug = async (title, excludeId = null) => {
-//   let baseSlug = slugify(title || "", { 
-//     lower: true, 
+//   let baseSlug = slugify(title || "", {
+//     lower: true,
 //     strict: true,
-//     trim: true 
+//     trim: true
 //   });
 
 //   if (!baseSlug) baseSlug = `tech-${Date.now()}`;
@@ -445,7 +444,6 @@
 //   }
 // };
 
-
 const techModel = require("../../module/technologymodule/technologymodule.js");
 const categoryModel = require("../../module/technologymodule/categorymodule.js");
 const imagekit = require("../../utils/imagekit.js");
@@ -455,10 +453,10 @@ const PopUser = require("../../module/popmodule.js");
 const slugify = require("slugify");
 
 const generateUniqueSlug = async (title, excludeId = null) => {
-  let baseSlug = slugify(title || "", { 
-    lower: true, 
+  let baseSlug = slugify(title || "", {
+    lower: true,
     strict: true,
-    trim: true 
+    trim: true,
   });
 
   if (!baseSlug) baseSlug = `tech-${Date.now()}`;
@@ -469,7 +467,7 @@ const generateUniqueSlug = async (title, excludeId = null) => {
   while (true) {
     const existing = await techModel.findOne({
       slug,
-      _id: { $ne: excludeId }
+      _id: { $ne: excludeId },
     });
 
     if (!existing) break;
@@ -507,7 +505,9 @@ const createTech = async (req, res) => {
       });
     }
 
-    const files = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
+    const files = Array.isArray(req.files.images)
+      ? req.files.images
+      : [req.files.images];
     const uploadedImages = [];
 
     for (let file of files) {
@@ -548,37 +548,62 @@ const createTech = async (req, res) => {
   }
 };
 
-// ================= UPDATE TECH (Using Slug) =================
+// ================= UPDATE TECH (Admin by ID) =================
+// ================= UPDATE TECH (Admin by ID) =================
 const updateTech = async (req, res) => {
   try {
-    const { slug } = req.params;
-    const { title, description, category, images } = req.body;
+    const { id } = req.params;
+    const { title, description, category } = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Product ID is required",
+      });
+    }
 
     const updateFields = {};
 
     if (title?.trim()) {
       updateFields.title = title.trim();
-      updateFields.slug = await generateUniqueSlug(title, req.params.id); // req.params.id may be undefined - safe
+      updateFields.slug = await generateUniqueSlug(title, id);
     }
-    if (description?.trim()) updateFields.description = description.trim();
+
+    if (description?.trim()) {
+      updateFields.description = description.trim();
+    }
 
     if (category) {
       const categoryExists = await categoryModel.findById(category);
       if (!categoryExists) {
-        return res.status(404).json({ success: false, message: "Category not found" });
+        return res.status(404).json({
+          success: false,
+          message: "Category not found",
+        });
       }
       updateFields.category = categoryExists._id;
     }
 
-    if (images && Array.isArray(images) && images.length > 0) {
-      updateFields.images = images;
+    // Handle new images if sent
+    if (req.files?.images) {
+      const files = Array.isArray(req.files.images) 
+        ? req.files.images 
+        : [req.files.images];
+
+      const uploadedImages = [];
+      for (let file of files) {
+        const uploadResponse = await imagekit.upload({
+          file: file.data.toString("base64"),
+          fileName: file.name,
+        });
+        uploadedImages.push(uploadResponse.url);
+      }
+      updateFields.images = uploadedImages;
     }
 
-    const updatedTech = await techModel.findOneAndUpdate(
-      { slug },
-      { $set: updateFields },
-      { new: true }
-    ).populate("category", "name");
+    const updatedTech = await techModel
+      .findByIdAndUpdate(id, { $set: updateFields }, { new: true })
+      .populate("category", "name");
 
     if (!updatedTech) {
       return res.status(404).json({
@@ -594,7 +619,10 @@ const updateTech = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating tech content:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error",
+    });
   }
 };
 
@@ -604,7 +632,9 @@ const getTechData = async (req, res) => {
     const techData = await techModel
       .find()
       .populate("category", "name slug")
-      .select("title slug description images views likes category createdAt updatedAt")
+      .select(
+        "title slug description images views likes category createdAt updatedAt",
+      )
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -648,15 +678,13 @@ const incrementView = async (req, res) => {
     const { slug } = req.params;
 
     const updated = await techModel
-      .findOneAndUpdate(
-        { slug },
-        { $inc: { views: 1 } },
-        { new: true }
-      )
+      .findOneAndUpdate({ slug }, { $inc: { views: 1 } }, { new: true })
       .populate("category", "name");
 
     if (!updated) {
-      return res.status(404).json({ success: false, message: "Post not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
     }
 
     res.status(200).json({ success: true, views: updated.views });
@@ -688,16 +716,18 @@ const toggleLike = async (req, res) => {
 
     const post = await techModel.findOne({ slug });
     if (!post) {
-      return res.status(404).json({ success: false, message: "Post not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
     }
 
     const hasLiked = post.likedBy?.some(
-      (uid) => uid.toString() === user._id.toString()
+      (uid) => uid.toString() === user._id.toString(),
     );
 
     if (hasLiked) {
       post.likedBy = post.likedBy.filter(
-        (uid) => uid.toString() !== user._id.toString()
+        (uid) => uid.toString() !== user._id.toString(),
       );
       post.likes = Math.max(0, post.likes - 1);
     } else {
@@ -725,7 +755,9 @@ const addComment = async (req, res) => {
     const { comment, userEmail } = req.body;
 
     if (!comment) {
-      return res.status(400).json({ success: false, message: "Comment is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Comment is required" });
     }
 
     let user = null;
@@ -736,13 +768,19 @@ const addComment = async (req, res) => {
     const post = await techModel
       .findOneAndUpdate(
         { slug },
-        { $push: { comments: { user: user ? user._id : null, comment: comment.trim() } } },
-        { new: true }
+        {
+          $push: {
+            comments: { user: user ? user._id : null, comment: comment.trim() },
+          },
+        },
+        { new: true },
       )
       .populate("category", "name");
 
     if (!post) {
-      return res.status(404).json({ success: false, message: "Post not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
     }
 
     res.status(201).json({
@@ -799,7 +837,7 @@ const sendOtp = async (req, res) => {
         otp,
         expires: Date.now() + 10 * 60 * 1000,
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, new: true, setDefaultsOnInsert: true },
     );
 
     await transporter.sendMail({
@@ -831,16 +869,20 @@ const sendOtp = async (req, res) => {
 // ================= VERIFY OTP + COMMENT (Fixed - Using Slug) =================
 const verifyOtpAndComment = async (req, res) => {
   try {
-    const { slug } = req.params;           // Changed from id to slug
+    const { slug } = req.params; // Changed from id to slug
     const { email, otp, comment } = req.body;
 
     if (!email || !otp || !comment) {
-      return res.status(400).json({ success: false, message: "All fields are required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required" });
     }
 
     const user = await PopUser.findOne({ email: email.toLowerCase().trim() });
     if (!user || !user.otp || !user.expires || user.expires < Date.now()) {
-      return res.status(400).json({ success: false, message: "OTP expired or invalid" });
+      return res
+        .status(400)
+        .json({ success: false, message: "OTP expired or invalid" });
     }
     if (user.otp !== otp) {
       return res.status(400).json({ success: false, message: "Invalid OTP" });
@@ -848,7 +890,7 @@ const verifyOtpAndComment = async (req, res) => {
 
     const post = await techModel
       .findOneAndUpdate(
-        { slug },                                 // Changed to slug
+        { slug }, // Changed to slug
         {
           $push: {
             comments: {
@@ -857,12 +899,14 @@ const verifyOtpAndComment = async (req, res) => {
             },
           },
         },
-        { new: true }
+        { new: true },
       )
       .populate("category", "name");
 
     if (!post) {
-      return res.status(404).json({ success: false, message: "Post not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
     }
 
     user.comments.push({ postId: post._id, comment: comment.trim() });
@@ -974,7 +1018,8 @@ const getAdminProducts = async (req, res) => {
       query.category = categoryId;
     }
 
-    const products = await techModel.find(query)
+    const products = await techModel
+      .find(query)
       .populate("category", "name slug")
       .select(
         "name title category author description images views likes content createdAt updatedAt comments",
@@ -1098,5 +1143,5 @@ module.exports = {
   verifyOtpAndComment,
   addComment,
   getSingleContent,
-  getAdminProducts
+  getAdminProducts,
 };

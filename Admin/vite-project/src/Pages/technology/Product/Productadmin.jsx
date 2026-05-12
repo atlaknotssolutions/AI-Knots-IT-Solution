@@ -1,5 +1,3 @@
-
-
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -20,6 +18,7 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 // Redux Actions & APIs
 import {
   fetchAdminTechs,
+  fetchCategories,
   deleteTech,
   updateTech,
 } from "../techslice/techslice.js";
@@ -32,7 +31,9 @@ import {
 export default function ProductAdmin() {
   const dispatch = useDispatch();
 
-  const { adminTechs, loading } = useSelector((state) => state.tech);
+  const { adminTechs, loading, categories } = useSelector(
+    (state) => state.tech,
+  );
 
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState([]);
@@ -50,18 +51,27 @@ export default function ProductAdmin() {
   const [activeProductId, setActiveProductId] = useState(null);
   const [commentLoading, setCommentLoading] = useState(false);
 
-  // Fetch Products
+  // Fetch Products + Categories
   useEffect(() => {
     dispatch(fetchAdminTechs());
+    dispatch(fetchCategories());
   }, [dispatch]);
 
   // Open Edit Modal
   const openEditModal = (product) => {
     setEditData({
       ...product,
+      title: product.title || product.name || "",
+      description: product.description || "",
       category: product.category?._id || product.category || "",
     });
-    setPreviewImages(product.thumbnail ? [product.thumbnail] : []);
+    setPreviewImages(
+      product.thumbnail
+        ? [product.thumbnail]
+        : Array.isArray(product.images)
+          ? product.images
+          : [],
+    );
     setSelectedFiles([]);
     setIsModalOpen(true);
   };
@@ -75,15 +85,15 @@ export default function ProductAdmin() {
 
   // Update Product
   const handleUpdate = async () => {
-    if (!editData?.name?.trim() || !editData?.description?.trim()) {
-      toast.error("Name and Description are required");
+    if (!editData?.title?.trim() || !editData?.description?.trim()) {
+      toast.error("Title and Description are required");
       return;
     }
 
     try {
       const formData = new FormData();
+      formData.append("title", editData.title.trim());
       formData.append("name", editData.title.trim());
-      formData.append("title", editData.title.trim()); // if backend expects title
       formData.append("description", editData.description.trim());
       formData.append("category", editData.category);
 
@@ -162,7 +172,7 @@ export default function ProductAdmin() {
           ),
       },
       { accessorKey: "title", header: "Product Name" },
-     
+
       {
         accessorKey: "description",
         header: "Description",
@@ -275,12 +285,12 @@ export default function ProductAdmin() {
             <div className="space-y-4">
               <input
                 type="text"
-                value={editData.name || ""}
+                value={editData.title || editData.name || ""}
                 onChange={(e) =>
-                  setEditData({ ...editData, name: e.target.value })
+                  setEditData({ ...editData, title: e.target.value })
                 }
                 className="w-full border rounded-lg px-3 py-2"
-                placeholder="Product Name"
+                placeholder="Product Title"
               />
 
               <CKEditor
@@ -299,7 +309,11 @@ export default function ProductAdmin() {
                 className="w-full border rounded-lg px-3 py-2"
               >
                 <option value="">Select Category</option>
-                {/* Add your categories here or fetch them */}
+                {categories?.map((category) => (
+                  <option key={category._id} value={category._id}>
+                    {category.name || category.title || "Category"}
+                  </option>
+                ))}
               </select>
 
               <input
@@ -363,7 +377,7 @@ export default function ProductAdmin() {
                   <div className="flex justify-between">
                     <div>
                       <p className="font-semibold">
-                        {comment.user?.name || "Anonymous"}
+                        {comment.user?.email?.split("@")[0] || "Anonymous"}
                       </p>
                       <p className="text-xs text-gray-500">
                         {new Date(comment.createdAt).toLocaleString()}
