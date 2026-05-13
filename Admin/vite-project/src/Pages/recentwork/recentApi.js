@@ -11,7 +11,7 @@ const api = axios.create({
 
 export const createTechApi = (data) => api.post("/recentwork/create", data);
 
-export const getCategoriesApi = () => api.get("/recentworkcategory"); // Adjust endpoint if needed
+export const getCategoriesApi = () => api.get("/recentworkcategory");
 
 export const getTechApi = () => api.get("/recentwork");
 
