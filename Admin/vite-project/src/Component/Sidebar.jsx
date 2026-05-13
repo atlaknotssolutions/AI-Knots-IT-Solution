@@ -331,6 +331,20 @@ const navItems = [
     ],
   },
 
+  {
+    label: "Recent Work",
+    icon: BarChart3,
+    children: [
+      { path: "/recentwork", label: "Recent Work", icon: TextSearch },
+      {
+        path: "/recentworkcategory",
+        label: "Recent Work Category",
+        icon: BarChart3,
+      },
+    ],
+  },
+    
+
   { path: "/gallery", label: "Gallery", icon: GalleryHorizontal },
 
 

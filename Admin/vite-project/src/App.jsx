@@ -23,6 +23,8 @@ import AdminJobs from "./Pages/createjob/AdminJob";
 import JobCategory from "./Pages/applyjobcategory/jobCategory";
 import JobApplications from "./Pages/createjob/JobApplications";
 import ProductAdmin from "./Pages/technology/Product/Productadmin";
+import Recentworkcategory from "./Pages/recentwork/recentworkcategory";
+import Recentwork from "./Pages/recentwork/recentwork";
 function App() {
   return (
     <BrowserRouter>
@@ -60,6 +62,10 @@ function App() {
               element={<JobApplications />}
             />
             <Route path="/adminproducts" element={<ProductAdmin />} />
+
+            <Route path="/recentworkcategory" element={<Recentworkcategory />} />
+            <Route path="/recentwork" element={<Recentwork />} />
+
           </Route>
         </Route>
         <Route path="*" element={<Login />} />

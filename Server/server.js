@@ -22,7 +22,9 @@ const portfolioRoutes = require("./Routes/portfolioroute/portfolioroute.js");
 const portfoliocategoryRoutes = require("./Routes/portfolioroute/categoryRoute.js");
 const jobapplyRoutes = require("./Routes/Jobroutes/jobapplyroutes.js");
 const jobapplyCategoryRoutes = require("./Routes/Jobroutes/jobcategoryRoute.js");
+const recentworkcategoryRoutes = require("./Routes/recentworkroute/recentworkrcategoryoutes.js");
 const jobapplicationRoutes = require("./Routes/Jobroutes/jobApplicationRoutes.js");
+const recentwork1Routes = require("./Routes/recentworkroute/recentworkroutes.js");
 dns.setServers(["8.8.8.8", "1.1.1.1", "0.0.0.0"]);
 
 const app = express();
@@ -75,6 +77,11 @@ app.use("/category/portfolio", portfoliocategoryRoutes);
 app.use("/jobapply", jobapplyRoutes);
 app.use("/category/jobapply", jobapplyCategoryRoutes);
 app.use("/jobapplication", jobapplicationRoutes);
+
+app.use("/recentworkcategory", recentworkcategoryRoutes);
+app.use("/recentwork", recentwork1Routes);
+
+
 
 app.get("/", (req, res) => {
   res.send("🚀 Server is running successfully");
