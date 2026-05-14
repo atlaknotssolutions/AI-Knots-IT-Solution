@@ -7,10 +7,10 @@ const createQueryModuleMessage = async (req, res) => {
   try {
     const { name, email, phone, message, category } = req.body;
 
-    if (!name || !email || !phone || !message || !category) {
+    if (!name || !email || !phone) {
       return res.status(400).json({
         success: false,
-        message: "All fields are required",
+        message: "Name, email, and phone are required",
       });
     }
 
