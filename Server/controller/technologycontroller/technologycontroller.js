@@ -586,8 +586,8 @@ const updateTech = async (req, res) => {
 
     // Handle new images if sent
     if (req.files?.images) {
-      const files = Array.isArray(req.files.images) 
-        ? req.files.images 
+      const files = Array.isArray(req.files.images)
+        ? req.files.images
         : [req.files.images];
 
       const uploadedImages = [];
@@ -870,12 +870,12 @@ const sendOtp = async (req, res) => {
 const verifyOtpAndComment = async (req, res) => {
   try {
     const { slug } = req.params; // Changed from id to slug
-    const { email, otp, comment } = req.body;
+    const { email, comment } = req.body;
 
-    if (!email || !otp || !comment) {
+    if (!email || !comment) {
       return res
         .status(400)
-        .json({ success: false, message: "All fields are required" });
+        .json({ success: false, message: "Email and comment are required" });
     }
 
     const user = await PopUser.findOne({ email: email.toLowerCase().trim() });
@@ -910,8 +910,8 @@ const verifyOtpAndComment = async (req, res) => {
     }
 
     user.comments.push({ postId: post._id, comment: comment.trim() });
-    user.otp = null;
-    user.expires = null;
+    // Keep the OTP valid until it expires so the same user can post another comment
+    // within the same verification window instead of forcing a new OTP immediately.
     await user.save();
 
     res.status(201).json({

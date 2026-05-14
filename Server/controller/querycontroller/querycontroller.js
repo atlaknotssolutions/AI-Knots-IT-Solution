@@ -5,7 +5,7 @@ const nodemailer = require("nodemailer");
 
 const createQueryModuleMessage = async (req, res) => {
   try {
-    const { name, email, phone, message,category } = req.body;
+    const { name, email, phone, message, category } = req.body;
 
     if (!name || !email || !phone || !message || !category) {
       return res.status(400).json({
@@ -22,9 +22,11 @@ const createQueryModuleMessage = async (req, res) => {
       message,
     });
 
-    // Create transporter
+    // Create transporter using the same SMTP provider as other message flows
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: process.env.EMAIL_HOST || "smtpout.secureserver.net",
+      port: Number(process.env.EMAIL_PORT) || 465,
+      secure: true,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
@@ -87,7 +89,10 @@ const deleteQueryModuleMessage = async (req, res) => {
     }
     res
       .status(200)
-      .json({ success: true, message: "QueryModule message deleted successfully" });
+      .json({
+        success: true,
+        message: "QueryModule message deleted successfully",
+      });
   } catch (error) {
     console.error("Error deleting QueryModule message:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
