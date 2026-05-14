@@ -32,6 +32,7 @@ const createQueryModuleMessage = async (req, res) => {
         pass: process.env.EMAIL_PASS,
       },
     });
+    
 
     // Mail options
     const mailOptions = {
