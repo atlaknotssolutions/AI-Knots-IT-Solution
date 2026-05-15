@@ -57,14 +57,14 @@ app.use(
     origin: true,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
-     allowedHeaders: ['Content-Type']
+    allowedHeaders: ["Content-Type", "Accept", "Authorization"],
   }),
 );
-
 
 app.use("/api/auth", authRoutes);
 app.use("/api", homeRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/contact", contactRoutes);
 app.use("/api/category", categoryRoutes);
 app.use("/api/blogcategory", blogRoutes);
 app.use("/api/technology/category", techcategoryRoute);
@@ -72,6 +72,7 @@ app.use("/api/technology/product", technologyRoute);
 app.use("/tech", techRoutes);
 app.use("/api/gallery", galleryRoutes);
 app.use("/query", queryRoutes);
+app.use("/api/query", queryRoutes);
 
 app.use("/portfolio", portfolioRoutes);
 app.use("/category/portfolio", portfoliocategoryRoutes);
@@ -82,8 +83,6 @@ app.use("/jobapplication", jobapplicationRoutes);
 
 app.use("/recentworkcategory", recentworkcategoryRoutes);
 app.use("/recentwork", recentwork1Routes);
-
-
 
 app.get("/", (req, res) => {
   res.send("🚀 Server is running successfully");
