@@ -57,8 +57,10 @@ app.use(
     origin: true,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
+     allowedHeaders: ['Content-Type']
   }),
 );
+
 
 app.use("/api/auth", authRoutes);
 app.use("/api", homeRoutes);
